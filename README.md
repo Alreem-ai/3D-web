@@ -60,8 +60,7 @@ The Studio demo has built-in templates for plates, bearing mounts, sensor bracke
 4. **Live demo gallery**: bearing mount, sensor bracket and shaft collar on turntables, with x-ray and hover dimensions.
 5. **Try it**: presets that the robot welds layer by layer.
 6. **Honest results**: results are being re-run on the new dataset; links to the Results page.
-7. **What we tried**: rejected approaches.
-8. **Footer CTA**.
+7. **Footer CTA**.
 
 ## Languages
 
@@ -77,7 +76,6 @@ The Studio demo has built-in templates for plates, bearing mounts, sensor bracke
 
 - [ ] Fill in the 5 placeholder families in the Library.
 - [ ] Fill in the team cards on the About page.
-- [ ] Check the drafted reasons in "What we tried".
 - [ ] Fill in the Results page once the new-dataset runs are done.
 - [ ] Connect Studio to the real backend (QLoRA fallback, STEP export).
 - [ ] Replace the procedural gallery models with the pipeline's GLB outputs.

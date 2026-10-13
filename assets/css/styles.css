@@ -191,14 +191,6 @@ td.ok { color: var(--cyan); font-family: var(--font-mono); }
 .pending { border: 1px dashed var(--cyan-dim); border-radius: 8px; padding: 12px 14px; font-size: .88rem; color: var(--muted); }
 .pending b { color: var(--cyan); font-family: var(--font-mono); font-weight: 500; }
 
-.timeline { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; position: relative; padding-top: 26px; }
-.timeline::before { content: ""; position: absolute; top: 6px; left: 0; right: 0; height: 1px; background: var(--line); }
-.tried { position: relative; border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 10px; background: rgba(15,31,56,.6); }
-.tried::before { content: ""; position: absolute; top: -25px; left: 18px; width: 9px; height: 9px; border-radius: 50%; background: var(--navy); border: 1.5px solid var(--muted); }
-.tried strong { font-family: var(--font-display); font-stretch: 112%; font-size: 1.1rem; }
-.stamp { width: fit-content; font: 700 .72rem var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--orange); border: 2px solid var(--orange); border-radius: 4px; padding: 3px 9px; transform: rotate(-4deg); opacity: .9; }
-.tried p { margin: 0; color: var(--muted); font-size: .9rem; }
-
 .cta { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: center; }
 .cta canvas { width: 100%; height: clamp(300px, 46vh, 440px); display: block; }
 .links { display: grid; gap: 10px; }
@@ -218,9 +210,6 @@ footer.base .container { display: flex; justify-content: space-between; gap: 12p
   .step.hero .card { background: linear-gradient(to top, rgba(10,22,40,.95) 70%, rgba(10,22,40,0)); border: 0; padding-inline: 0; backdrop-filter: none; }
   .try, .notebook, .cta { grid-template-columns: minmax(0, 1fr); }
   .legend { grid-template-columns: minmax(0, 1fr); }
-  .timeline { grid-template-columns: minmax(0, 1fr); padding-top: 0; padding-left: 22px; }
-  .timeline::before { top: 0; bottom: 0; left: 4px; right: auto; width: 1px; height: auto; }
-  .tried::before { top: 22px; left: -23px; }
   #galleryCanvas { height: min(150vw, 820px); }
   .bar { grid-template-columns: 7.5rem minmax(0, 1fr) 3.4rem; }
 }
