@@ -8,23 +8,6 @@
   /* ---------- Non-3D UI ---------- */
   document.querySelectorAll('.bar .fill').forEach(f => { f.style.width = f.dataset.w + '%'; });
 
-  const input = document.getElementById('promptInput');
-  const parsedEl = document.getElementById('parsed');
-  const promptState = { text: '', nums: [], typedAt: -1e9 };
-  const parseNums = s => (s.match(/\d+(?:\.\d+)?/g) || []).slice(0, 4);
-  input.addEventListener('input', () => {
-    promptState.text = input.value;
-    promptState.nums = parseNums(input.value);
-    promptState.typedAt = performance.now();
-    parsedEl.innerHTML = promptState.nums.length
-      ? 'Found: ' + promptState.nums.map(n => '<span class="mm">' + n + ' mm</span>').join('')
-      : 'The robot reads every millimetre value as you type.';
-  });
-  document.getElementById('promptForm').addEventListener('submit', e => {
-    e.preventDefault();
-    if (!promptState.nums.length) { parsedEl.textContent = 'Add a size first, for example: plate 60 × 40 × 5 mm.'; input.focus(); return; }
-    document.getElementById('scale').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
-  });
   /* ---------- Router: one page per hash (#studio, #how, …) ---------- */
   const ROUTES = ['home', 'studio', 'how', 'library', 'results', 'about', 'guide'];
   const routeEls = [...document.querySelectorAll('.pg')];
@@ -756,9 +739,7 @@
       let look = null, L = IDLE_L, Ra = IDLE_R, tabText = '', tabHL = false, tokenX = -.6;
 
       if (idx === 0) {
-        L = CAL_L; tabText = promptState.text; tabHL = true;
-        if (promptState.nums.length) { v.big = promptState.nums.slice(0, 3).join(' · '); v.text = 'PARSED · mm'; }
-        if (document.activeElement === input || performance.now() - promptState.typedAt < 2500) look = LOOK.tablet;
+        L = CAL_L; tabText = REQ; tabHL = true;
       } else if (idx === 1) {
         const grow = smooth(.4, .78, local);
         G.plate = lerp(.03, 1, grow); G.speck = 1 - smooth(.3, .45, local); G.pdim = smooth(.78, .9, local);

@@ -42,7 +42,7 @@ The site is one `index.html` with hash routes:
 
 ## What you can do on the site
 
-- **Home**: type a part into the hero prompt and the robot's visor reads the mm values; scroll to watch it act out each pipeline stage.
+- **Home**: the robot follows your cursor; scroll to watch it act out each pipeline stage.
 - **Gallery**: drag a part to orbit it, hover for its dimensions, toggle x-ray.
 - **Try it**: pick a preset and the robot welds it layer by layer.
 - **Studio**: describe a part (or pick an example) and press Generate. The browser demo parses the spec, picks a recipe, builds the part in real millimetres, runs the four validation checks and unlocks downloads. Drag to orbit, scroll to zoom, toggle x-ray and dimensions, and reopen earlier parts from History.
@@ -54,7 +54,7 @@ The Studio demo has built-in templates for plates, bearing mounts, sensor bracke
 
 ## Landing page sections
 
-1. **Hero**: the robot at its workbench; type a part in the prompt box and the visor reads the mm values.
+1. **Hero**: the robot at its workbench, following your cursor.
 2. **The scale problem**: a 60 × 40 × 5 mm plate starts as a speck and grows to true size.
 3. **How it works**: read the spec → recipe RAG → the fork (deterministic compiler / corrected QLoRA fallback) → validation gate → export.
 4. **Live demo gallery**: bearing mount, sensor bracket and shaft collar on turntables, with x-ray and hover dimensions.
