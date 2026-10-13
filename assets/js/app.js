@@ -1097,8 +1097,6 @@
     const trackEls = {}; document.querySelectorAll('#stTracker li').forEach(li => { trackEls[li.dataset.k] = li; });
     function setTrack(k, cls, text) { const li = trackEls[k]; li.className = cls || ''; li.querySelector('span').textContent = text; li.title = text; }
     const snapTrack = () => Object.keys(trackEls).map(k => [k, trackEls[k].className, trackEls[k].querySelector('span').textContent]);
-    const checkEls = {}; document.querySelectorAll('#stChecks li').forEach(li => { checkEls[li.dataset.k] = li; });
-    function setCheck(k, state, text) { const li = checkEls[k]; li.classList.toggle('on', state === 'pass'); li.classList.toggle('fail', state === 'fail'); li.querySelector('small').textContent = text; }
     const bubble = $('stBubble');
     function say(text, fail) { bubble.textContent = text; bubble.classList.toggle('fail', !!fail); }
     const dlBtns = [...document.querySelectorAll('[data-dl]')], dlNote = $('stDlNote');
@@ -1114,16 +1112,6 @@
       if (spec.features.length) row('Features', spec.features.join(', '));
       if (spec.assumed.length) row('Assumed', spec.assumed.join(', '));
       row('Units', 'mm');
-    }
-    function showEnv(req, meas) {
-      const tb = $('stEnv'); tb.innerHTML = '';
-      if (!req) { tb.innerHTML = '<tr><td colspan="3" class="muted">Runs after a build.</td></tr>'; return; }
-      [['X (width)', 0], ['Z (depth)', 2], ['Y (height)', 1]].forEach(([n, i]) => {
-        const tr = document.createElement('tr');
-        const ok = meas && Math.abs(meas[i] - req[i]) <= .1;
-        [n, fmt(req[i]) + ' mm', meas ? meas[i].toFixed(2) + ' mm' : '–'].forEach((txt, j) => { const td = document.createElement('td'); td.textContent = txt; if (j === 2 && meas) td.className = ok ? 'okv' : 'bad'; tr.append(td); });
-        tb.append(tr);
-      });
     }
     function measure(geos) {
       const b = new T.Box3(); geos.forEach(g => { g.computeBoundingBox(); b.union(g.boundingBox); });
@@ -1150,8 +1138,7 @@
     function restore(h) {
       active = h; $('stPrompt').value = h.spec.text;
       h.track.forEach(([k, cls, txt]) => setTrack(k, cls, txt));
-      showSpec(h.spec); h.checks.forEach(([k, s, txt]) => setCheck(k, s, txt));
-      showEnv(h.spec.envelope, h.meas);
+      showSpec(h.spec);
       $('stCode').textContent = h.code || '# No code: the request stopped before code generation.';
       showPart(h.geos, h.meas || [60, 10, 40], true);
       $('stViewLabel').textContent = h.geos ? (h.spec.label || '').toUpperCase() : 'NO PART · UNITS mm';
@@ -1166,12 +1153,11 @@
       if (running) return; running = true;
       const go = $('stGo'); go.disabled = true;
       Object.keys(trackEls).forEach(k => setTrack(k, '', 'waiting'));
-      CHECKS.forEach(([k]) => setCheck(k, '', '–')); showEnv(null); setDownloads(false);
+      setDownloads(false);
       $('stCode').textContent = '# Writing…'; setBot('think'); say('Reading your request…');
-      const entry = { spec: null, geos: null, meas: null, pass: false, code: '', checks: [] };
+      const entry = { spec: null, geos: null, meas: null, pass: false, code: '' };
       const finish = (msg, pass) => {
         entry.message = msg; entry.pass = pass; entry.track = snapTrack();
-        entry.checks = CHECKS.map(([k]) => [k, checkEls[k].classList.contains('on') ? 'pass' : checkEls[k].classList.contains('fail') ? 'fail' : '', checkEls[k].querySelector('small').textContent]);
         history.push(entry); active = entry; renderHistory();
         setBot(pass ? 'pass' : 'fail'); say(msg, !pass); running = false; go.disabled = false;
       };
@@ -1211,13 +1197,11 @@
       };
       let failed = null;
       for (const [k, name] of CHECKS) {
-        await wait(380);
+        if (failed) break;
+        setTrack('valid', 'run', name.toLowerCase() + '…'); await wait(380);
         const r = results[k];
-        if (failed || r === 'skip') { setCheck(k, '', 'skipped'); continue; }
-        if (r) { setCheck(k, 'fail', 'fail'); failed = [name, r]; continue; }
-        setCheck(k, 'pass', k === 'env' ? '±0.1 mm' : 'pass');
+        if (r && r !== 'skip') failed = [name, r];
       }
-      showEnv(spec.envelope, entry.meas);
       if (failed) {
         setTrack('valid', 'fail', failed[0].toLowerCase() + ' failed'); setTrack('export', 'fail', 'locked'); entry.reasonShort = failed[0].toLowerCase();
         return finish(failed[0] + ' failed: ' + failed[1], false);

@@ -290,13 +290,6 @@ textarea:focus { outline: none; border-color: var(--orange); }
 .spec dt { color: var(--muted); font: .76rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
 .spec dd { margin: 0; }
 .checks.sm li { padding: 8px 12px; font-size: .88rem; }
-.checks li.fail { border-color: rgba(255,138,42,.7); }
-.checks li.fail .box { background: var(--orange); border-color: var(--orange); color: var(--navy); }
-.checks li.fail small { color: var(--orange); }
-table.env { font-size: .84rem; }
-table.env td, table.env th { padding: 6px; }
-table.env td.bad { color: var(--orange); font-family: var(--font-mono); }
-table.env td.okv { color: var(--cyan); font-family: var(--font-mono); }
 .dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .code summary { cursor: pointer; font: 600 .95rem var(--font-display); font-stretch: 112%; }
 .code pre { margin: 0; overflow: auto; max-height: 340px; font: .76rem/1.5 var(--font-mono); color: #cfe3f7; background: rgba(4,17,31,.8); border-radius: 8px; padding: 12px; }
@@ -404,7 +397,7 @@ table.env td.okv { color: var(--cyan); font-family: var(--font-mono); }
 
 @media (max-width: 1180px) {
   .studio { grid-template-columns: minmax(240px, 280px) minmax(0, 1fr); }
-  .s-right { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .s-right { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
   .lib-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {

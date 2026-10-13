@@ -32,7 +32,7 @@ The site is one `index.html` with hash routes:
 | Route | Page |
 |---|---|
 | `#home` | Landing page: the robot acts out the pipeline as you scroll |
-| `#studio` | The generator: prompt panel, 3D viewport, spec, pipeline tracker, validation report, downloads, history |
+| `#studio` | The generator: prompt panel, 3D viewport, spec, pipeline tracker, downloads, history |
 | `#how` | Technical deep dive: interactive workflow, the scale problem, recipe RAG, compiler vs QLoRA, validation chain |
 | `#library` | The 8 engineering families with rotating previews and "Open in Studio" |
 | `#results` | Lab notebook (on hold while results are re-run on the new dataset) |
