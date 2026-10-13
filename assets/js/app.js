@@ -1366,7 +1366,7 @@
     const matTop = new T.Mesh(new T.CircleGeometry(1.55, 64), new T.MeshStandardMaterial({ map: MAT_TEX(), roughness: .9 })); matTop.rotation.x = -Math.PI / 2; matTop.position.y = .802; sc.add(matTop);
     const R = makeRobot(); { const a = 293 * Math.PI / 180, x = 2.2 * Math.cos(a), z = 2.2 * Math.sin(a); R.group.position.set(x, -.35, z); R.group.rotation.y = Math.atan2(-x, -z); } sc.add(R.group);
     const part = makePart('collar', metal()); part.scale.setScalar(.03); part.position.set(0, .8, .2); sc.add(part);
-    const pawns = []; let avatar = null, alien = null;
+    const pawns = []; let avatar = null, alien = null, eagle = null;
     // Alreem's character: a cream bunny with an XR headset, working on a holographic computer
     function makeAvatar(g) {
       const fur = std('#f2cfa2', .7, 0), inner = std('#ee8a86', .7, 0), blush = std('#f3a6a6', .8, 0, { transparent: true, opacity: .75 });
@@ -1491,17 +1491,63 @@
       const tag = label('Ghaida', { border: C.cyan, h: .22 }); tag.position.y = 2.42; g.add(tag);
       return { head, arms, eyes, antennae, drawLaptop };
     }
+    // Fahad's character: a bald eagle watching his desktop 3D printer build a part
+    function makeEagle(g) {
+      const brown = std('#6b4a2f', .7, 0), feather = std('#4a3220', .7, 0), white = std('#f4efe4', .65, 0), cream = std('#e2d6bf', .7, 0);
+      const gold = std('#f2b33a', .4, .05), dark = std('#1a1410', .3, .2);
+      const body = new T.Mesh(new T.CylinderGeometry(.25, .4, 1.0, 40), brown); body.position.y = .93; g.add(body);
+      const head = new T.Group(); head.position.y = 1.72; g.add(head);
+      const skull = new T.Mesh(new T.SphereGeometry(.3, 40, 28), white); skull.scale.set(1, .95, 1); head.add(skull);
+      // amber eyes under a low brow, the eagle's look
+      const eyes = [-1, 1].map(s => {
+        const eg = new T.Group(); eg.position.set(s * .12, .03, .255); eg.rotation.y = s * .35; head.add(eg);
+        const iris = new T.Mesh(new T.SphereGeometry(.055, 24, 16), std('#f2c14e', .35, 0)); iris.scale.z = .5; eg.add(iris);
+        const pupil = new T.Mesh(new T.SphereGeometry(.03, 16, 12), dark); pupil.position.z = .022; eg.add(pupil);
+        const glint = new T.Mesh(new T.SphereGeometry(.011, 10, 6), basic('#ffffff')); glint.position.set(.015, .018, .04); eg.add(glint);
+        const brow = new T.Mesh(new T.SphereGeometry(.08, 20, 12), cream); brow.scale.set(1.1, .26, .6); brow.position.set(s * .13, .115, .23); brow.rotation.z = s * .12; head.add(brow);
+        return eg;
+      });
+      // hooked beak: cere, upper bill pointing forward, hook curling down at the tip
+      const cere = new T.Mesh(new T.SphereGeometry(.075, 24, 16), gold); cere.scale.set(1, .8, 1); cere.position.set(0, -.04, .26); head.add(cere);
+      const bill = new T.Mesh(new T.ConeGeometry(.06, .16, 24), gold); bill.rotation.x = Math.PI / 2; bill.position.set(0, -.05, .36); head.add(bill);
+      const hook = new T.Mesh(new T.ConeGeometry(.028, .08, 16), gold); hook.rotation.x = Math.PI; hook.position.set(0, -.09, .43); head.add(hook);
+      [-1, 0, 1].forEach(k => { const f = new T.Mesh(new T.ConeGeometry(.035, .14, 12), white); f.position.set(k * .07, .22, -.17); f.rotation.set(-.9, 0, k * .3); head.add(f); });
+      const ruff = new T.Mesh(new T.TorusGeometry(.26, .06, 12, 44), white); ruff.rotation.x = Math.PI / 2; ruff.position.y = 1.43; g.add(ruff);
+      const wings = [-1, 1].map(s => {
+        const sh = new T.Group(); sh.position.set(s * .3, 1.33, 0); g.add(sh);
+        const wing = new T.Mesh(new T.SphereGeometry(.13, 24, 16), brown); wing.scale.set(.45, 2.1, 1.2); wing.position.y = -.24; sh.add(wing);
+        [-1, 0, 1].forEach(k => { const f = new T.Mesh(new T.SphereGeometry(.05, 12, 8), feather); f.scale.set(.5, 2, .9); f.position.set(0, -.5, k * .06); f.rotation.x = k * .3; sh.add(f); });
+        return sh;
+      });
+      // desktop 3D printer on the table; the carriage rises one layer at a time
+      const pr = new T.Group(); pr.position.set(0, .805, .82); pr.scale.setScalar(1.35); g.add(pr);
+      const frameM = std('#2a3a55', .4, .5);
+      const base = new T.Mesh(new T.BoxGeometry(.42, .04, .34), frameM); base.position.y = .02; pr.add(base);
+      const bed = new T.Mesh(new T.BoxGeometry(.3, .012, .26), std('#16294a', .5, .3)); bed.position.y = .046; pr.add(bed);
+      [-1, 1].forEach(s => { const post = new T.Mesh(new T.BoxGeometry(.03, .42, .03), frameM); post.position.set(s * .19, .23, -.12); pr.add(post); });
+      const car = new T.Group(); pr.add(car);
+      const bar = new T.Mesh(new T.BoxGeometry(.41, .025, .025), frameM); bar.position.z = -.12; car.add(bar);
+      const nz = new T.Group(); car.add(nz);
+      const arm = new T.Mesh(new T.BoxGeometry(.02, .02, .13), frameM); arm.position.z = -.06; nz.add(arm);
+      const block = new T.Mesh(new T.BoxGeometry(.05, .045, .05), std(C.orange, .45, 0, { emissive: col(C.orange), emissiveIntensity: .35 })); nz.add(block);
+      const tip = new T.Mesh(new T.ConeGeometry(.015, .035, 12), basic('#ffd27a', { toneMapped: false })); tip.rotation.x = Math.PI; tip.position.y = -.04; nz.add(tip);
+      const PS = .006, printed = makePart('collar', metal(), .5); printed.position.y = .052; pr.add(printed);
+      function print(t) {
+        const c = t % 6.5, k = Math.min(1, c / 5);
+        printed.scale.set(PS, PS * Math.max(k, .002), PS);
+        car.position.y = .052 + DIMS.collar[1] * PS * k + .058;
+        nz.position.x = c < 5 ? .085 * Math.sin(t * 6) : 0;
+      }
+      const tag = label('Fahad', { border: '#f2b33a', h: .22 }); tag.position.y = 2.42; g.add(tag);
+      return { head, wings, eyes, nz, print };
+    }
     [200, 247, 340].forEach((deg, i) => {
       const a = deg * Math.PI / 180, x = 2.25 * Math.cos(a), z = 2.25 * Math.sin(a);
       const g = new T.Group(); g.position.set(x, 0, z); g.rotation.y = Math.atan2(-x, -z); sc.add(g);
       const chair = rbox(.8, 1.3, .12, .1, std('#1d2e49', .6, .2)); chair.position.set(0, .9, -.42); g.add(chair);
       if (i === 0) { g.rotation.y -= .55; avatar = makeAvatar(g); pawns.push(g); return; }
       if (i === 1) { g.rotation.y -= .2; alien = makeAlien(g); pawns.push(g); return; }
-      const body = new T.Mesh(new T.CylinderGeometry(.3, .42, 1.05, 32), std('#2b4673', .55, .1)); body.position.y = .95; g.add(body);
-      const head = new T.Mesh(new T.SphereGeometry(.27, 32, 20), std('#2b4673', .5, .1)); head.position.y = 1.72; g.add(head);
-      const band = new T.Mesh(new T.TorusGeometry(.31, .02, 8, 48), basic(C.cyan, { toneMapped: false })); band.rotation.x = Math.PI / 2; band.position.y = 1.4; g.add(band);
-      const tag = label(String(i + 1).padStart(2, '0'), { h: .2 }); tag.position.y = 2.2; g.add(tag);
-      pawns.push(g);
+      g.rotation.y += .3; eagle = makeEagle(g); pawns.push(g);
     });
     S.onResize = (w, h) => {
       const cam = S.camera, asp = w / h, tanH = Math.tan(T.MathUtils.degToRad(cam.fov / 2));
@@ -1521,6 +1567,17 @@
         alien.eyes.forEach(e => { e.scale.y = blink; });
         alien.antennae.forEach((a, k) => { a.rotation.x = reduce ? 0 : .12 * Math.sin(t * 2.2 + k); });
         alien.drawLaptop(reduce ? 0 : t);
+      }
+      if (eagle) {
+        // watches the nozzle, tilts his head like a bird, flaps every few seconds
+        eagle.head.rotation.y = damp(eagle.head.rotation.y, clamp((ptr.x / innerWidth - .5) * .4, -.25, .25) + eagle.nz.position.x * 1.5, 4, dt);
+        eagle.head.rotation.x = damp(eagle.head.rotation.x, .22, 4, dt);
+        eagle.head.rotation.z = damp(eagle.head.rotation.z, !reduce && t % 3.7 < 1.1 ? .22 : 0, 10, dt);
+        const ft = t % 6, flap = reduce || ft > 1.2 ? 0 : Math.sin(ft / 1.2 * Math.PI * 3) ** 2 * .7;
+        eagle.wings.forEach((w, k) => { w.rotation.z = damp(w.rotation.z, (k ? 1 : -1) * (.12 + flap), 14, dt); w.rotation.x = damp(w.rotation.x, -.15, 6, dt); });
+        const blink = reduce ? 1 : (t % 5.1 < .12 ? .15 : 1);
+        eagle.eyes.forEach(e => { e.scale.y = blink; });
+        eagle.print(reduce ? 4 : t);
       }
       if (avatar) {
         const look = clamp((ptr.x / innerWidth - .5) * .5, -.3, .3);
