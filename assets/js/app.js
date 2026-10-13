@@ -911,7 +911,6 @@
     const spGeo = new T.BufferGeometry(); spGeo.setAttribute('position', new T.BufferAttribute(spPos, 3));
     const sparks = new T.Points(spGeo, new T.PointsMaterial({ color: col('#ffb36b'), size: .045, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false }));
     S3.scene.add(sparks); let spI = 0;
-    const doneLabel = label('ready', { border: C.orange, h: .2 }); doneLabel.visible = false; S3.scene.add(doneLabel);
     const statusEl = document.getElementById('status'), presetBtns = [...document.querySelectorAll('.preset')];
     const job = { kind: null, t0: 0 };
     const BUILD = 3.4, HAND = 1.0;
@@ -921,8 +920,8 @@
       presetBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.part === kind));
       const d = DIMS[kind];
       statusEl.textContent = 'Building ' + NAMES[kind].toLowerCase() + ', ' + d[0] + ' × ' + d[2] + ' × ' + d[1] + ' mm…';
-      const lab = doneLabel; S3.scene.remove(lab);
-      const nl = label(FILES[kind] + ' · .step .stl .glb', { border: C.orange, h: .19 }); nl.visible = false; S3.scene.add(nl); job.label = nl;
+      if (job.label) { S3.scene.remove(job.label); job.label.material.map.dispose(); job.label.material.dispose(); } // clear the previous part's file label
+      const nl =label(FILES[kind] + ' · .step .stl .glb', { border: C.orange, h: .19 }); nl.visible = false; S3.scene.add(nl); job.label = nl;
     }
     presetBtns.forEach(b => b.addEventListener('click', () => start(b.dataset.part)));
     let autoStarted = false;
