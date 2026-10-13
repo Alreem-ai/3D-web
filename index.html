@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Mujassam (مجسّم): natural language to validated CAD in real millimetres, exported as STEP, STL and GLB.">
+<title>Mujassam مجسّم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Kufi+Arabic:wght@600;800&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<header class="nav">
+  <div class="container">
+    <a class="logo" href="#home" aria-label="Mujassam home"><span class="ar" lang="ar">مجسّم</span><span class="tick"></span><span class="en">MUJASSAM</span></a>
+    <nav class="navlinks" id="navlinks" aria-label="Pages">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#studio" data-nav="studio">Studio</a>
+      <a href="#how" data-nav="how">How It Works</a>
+      <a href="#library" data-nav="library">Library</a>
+      <a href="#results" data-nav="results">Results</a>
+      <a href="#about" data-nav="about">About</a>
+    </nav>
+    <div class="navright">
+      <a class="btn" href="#studio">Try Mujassam</a>
+      <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navlinks">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<div class="pg" data-route="home" id="page-home">
+  <!-- 1–3: hero, scale problem, pipeline (one sticky 3D bench) -->
+  <div id="story">
+    <div class="sticky"><canvas id="bench" aria-label="A 3D workshop robot at a workbench. Its head follows your cursor and it acts out each stage as you scroll." role="img"></canvas></div>
+    <div class="steps">
+      <section class="step hero" data-stage="0">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <p class="brand"><span class="ar" lang="ar">مجسّم</span><span class="slash">/</span><span class="en">Mujassam</span></p>
+            <h1>Say it. Measure it. Make it.</h1>
+            <p class="sub"><b>Natural language</b><span class="arr">→</span><b>validated CAD in real mm</b><span class="arr">→</span><b>STEP / STL / GLB</b></p>
+            <form class="prompt" id="promptForm" autocomplete="off">
+              <label for="promptInput">Describe a part</label>
+              <input id="promptInput" name="prompt" placeholder="Describe a part in millimetres…" maxlength="80">
+              <button class="btn" type="submit">Measure</button>
+            </form>
+            <p class="parsed" id="parsed" aria-live="polite">The robot reads every millimetre value as you type.</p>
+            <div class="scrollhint"><i></i>Scroll to see how it gets the size right</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="step tall" data-stage="1" id="scale">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <div class="eyebrow">The scale problem</div>
+            <h2>You asked for <span class="mm">60 × 40 × 5 mm</span>. You got a grain of rice.</h2>
+            <p class="body">Generating CAD code isn't the hard part. Getting the real dimensions right is. Training data lived in a tiny normalized coordinate space, so models learned to write numbers close to zero.</p>
+            <div class="stats">
+              <div class="stat"><b>≈ 0.0188</b><span>median numeric literal in the training code</span></div>
+              <div class="stat"><b>93.3%</b><span>of literals are ≤ 1.0</span></div>
+            </div>
+            <p class="body">Keep scrolling. <strong>Mujassam grows the part to true size</strong> and the dimension lines snap into place.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-stage="2" id="how-step">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <div class="eyebrow">How it works · stage 1 of 5</div>
+            <h3>Read the spec</h3>
+            <p class="body">The visor parses the request and highlights every millimetre value before a single line of CAD code is written.</p>
+            <div class="request">Split shaft collar, <span class="mm">16 mm</span> bore, <span class="mm">32 mm</span> OD, <span class="mm">12 mm</span> wide</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-stage="3">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <div class="eyebrow">How it works · stage 2 of 5</div>
+            <h3>Recipe RAG</h3>
+            <p class="body">The robot pulls the closest of <strong>8 engineering-family blueprints</strong> from the shelf and shows how similar it is to your request.</p>
+            <span class="chip">Split shaft collar <b>0.71</b></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-stage="4">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <div class="eyebrow">How it works · stage 3 of 5</div>
+            <h3>The fork</h3>
+            <div class="routes">
+              <div class="route main"><span class="tag">Match</span><strong>Deterministic compiler</strong><span>A confident recipe match rides the conveyor straight to the compiler.</span></div>
+              <div class="route alt"><span class="tag">Unknown</span><strong>Corrected QLoRA fallback</strong><span>An unfamiliar part goes to the fallback station, with up to 3 repair loops.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-stage="5">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <div class="eyebrow">How it works · stage 4 of 5</div>
+            <h3>Validation gate</h3>
+            <p class="body">A scanner beam checks the part, then a bounding box draws itself with labels in millimetres.</p>
+            <ul class="checks" id="checks">
+              <li><span class="box">✓</span>AST safety<small>code</small></li>
+              <li><span class="box">✓</span>Isolated execution<small>sandbox</small></li>
+              <li><span class="box">✓</span>Watertight<small>mesh</small></li>
+              <li><span class="box">✓</span>Envelope<small>32 × 32 × 12 mm</small></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-stage="6">
+        <div class="container" style="width:100%">
+          <div class="card">
+            <div class="eyebrow">How it works · stage 5 of 5</div>
+            <h3>Export</h3>
+            <p class="body">The checked part drops into three bins, ready for CAD tools, 3D printers and the web.</p>
+            <div class="bins"><span>STEP</span><span>STL</span><span>GLB</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 4: gallery -->
+  <section class="block" id="gallery-sec">
+    <div class="container">
+      <div class="head">
+        <div class="eyebrow">Live demo gallery</div>
+        <h2>Three parts, true to the millimetre.</h2>
+        <p class="body">Drag a part to orbit it, hover for its dimensions, and switch on x-ray to see the bores, holes and the split slot.</p>
+        <div class="row"><button class="btn ghost toggle" id="xray" type="button" aria-pressed="false">X-ray: off</button></div>
+      </div>
+      <div class="viewer" id="galleryWrap">
+        <canvas id="galleryCanvas" aria-label="Three rotating CAD parts on turntables" role="img"></canvas>
+        <div class="corner tl">SCALE 1:1 · UNITS mm</div>
+        <div class="corner br">DRAG TO ORBIT</div>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <div class="legend">
+        <div><strong>Flanged bearing mount</strong><span>48 × 48 × 18 mm</span></div>
+        <div><strong>U-shaped sensor bracket</strong><span>50 × 30 × 35 mm</span></div>
+        <div><strong>Split shaft collar</strong><span>≈ 32 × 32 × 12 mm</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5: try it -->
+  <section class="block" id="try-sec">
+    <div class="container try">
+      <div class="head" style="margin:0">
+        <div class="eyebrow">Try it</div>
+        <h2>Pick a part. Watch it get built.</h2>
+        <p class="body">The robot welds the part layer by layer and hands it over. Presets run from pre-generated models, so the demo is instant.</p>
+        <div class="presets" role="group" aria-label="Preset prompts">
+          <button class="preset" type="button" data-part="bearing" aria-pressed="false"><strong>Bearing mount</strong><span>“flanged mount, 48 × 48 × 18 mm”</span><em>Build</em></button>
+          <button class="preset" type="button" data-part="bracket" aria-pressed="false"><strong>Sensor bracket</strong><span>“U bracket, 50 × 30 × 35 mm”</span><em>Build</em></button>
+          <button class="preset" type="button" data-part="collar" aria-pressed="false"><strong>Shaft collar</strong><span>“split collar, 32 × 32 × 12 mm”</span><em>Build</em></button>
+        </div>
+        <p class="status" id="status" aria-live="polite">Choose a preset to start a build.</p>
+      </div>
+      <div class="viewer"><canvas id="tryCanvas" aria-label="The robot welding the selected part layer by layer" role="img"></canvas></div>
+    </div>
+  </section>
+
+  <!-- 6: honest results -->
+  <section class="block" id="results-sec">
+    <div class="container">
+      <div class="head">
+        <div class="eyebrow">Honest results · lab notebook</div>
+        <h2>New numbers are on the way.</h2>
+        <p class="body">We switched to a new dataset, so every result is being re-run from scratch. We'll publish them on the Results page once the runs are done, labelled as development or locked-test results.</p>
+        <div class="row"><a class="btn ghost" href="#results">Open the Results page</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7: what we tried -->
+  <section class="block" id="tried-sec">
+    <div class="container">
+      <div class="head">
+        <div class="eyebrow">What we tried</div>
+        <h2>Approaches we tested and dropped.</h2>
+        <p class="body">More on each one, and on how the final pipeline works, on the <a href="#how">How It Works</a> page.</p>
+      </div>
+      <div class="timeline">
+        <div class="tried"><span class="stamp">Rejected</span><strong>FutureCAD RAG</strong><p>Its examples didn't match the CadQuery style we generate, so they added noise instead of guidance.</p></div>
+        <div class="tried"><span class="stamp">Rejected</span><strong>Full-code RAG</strong><p>Whole programs got copied, dimensions and all. Retrieving recipe knowledge worked better.</p></div>
+        <div class="tried"><span class="stamp">Rejected</span><strong>Non-uniform scaling</strong><p>Stretching each axis separately turns round holes into ellipses.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8: footer CTA -->
+  <section class="block" id="cta-sec">
+    <div class="container cta">
+      <div class="head" style="margin:0">
+        <div class="eyebrow">Take a part home</div>
+        <h2>Real millimetres, ready to open.</h2>
+        <div class="links">
+          <a href="#library"><strong>Part library</strong><span>the engineering families</span></a>
+          <a href="#results"><strong>Results &amp; research</strong><span>the lab notebook</span></a>
+          <a href="#about" class="hl"><strong>Meet the team</strong><span>who built Mujassam</span></a>
+        </div>
+      </div>
+      <canvas id="byeCanvas" aria-label="The robot waving goodbye beside a finished part" role="img"></canvas>
+    </div>
+  </section>
+</div>
+<!-- ============ STUDIO ============ -->
+<div class="pg page" data-route="studio" id="page-studio" hidden>
+  <div class="studio">
+    <aside class="s-left">
+      <div class="panel">
+        <div class="eyebrow">Studio</div>
+        <h1 class="s-title">Describe a part</h1>
+        <form id="stForm" class="s-form" autocomplete="off">
+          <label for="stPrompt" class="sr">Part description</label>
+          <textarea id="stPrompt" rows="4" placeholder="Plate 60 × 40 × 5 mm with 4 holes Ø5 mm"></textarea>
+          <button class="btn" type="submit" id="stGo">Generate</button>
+        </form>
+        <div class="s-presets" aria-label="Example prompts">
+          <button type="button" class="pchip" data-prompt="Plate 60 × 40 × 5 mm with 4 holes Ø5 mm">Plate</button>
+          <button type="button" class="pchip" data-prompt="Flanged bearing mount 48 × 48 × 18 mm, 16 mm bore, 4 holes Ø5.5 mm">Bearing mount</button>
+          <button type="button" class="pchip" data-prompt="U sensor bracket 50 × 30 × 35 mm, 5 mm thick, Ø10 mm sensor hole">Sensor bracket</button>
+          <button type="button" class="pchip" data-prompt="Split shaft collar, 16 mm bore, 32 mm OD, 12 mm wide">Shaft collar</button>
+          <button type="button" class="pchip warn" data-prompt="a small bracket for my sensor">Vague prompt</button>
+          <button type="button" class="pchip warn" data-prompt="Spur gear, 20 teeth, 40 mm diameter">Unknown part</button>
+        </div>
+        <p class="note">Getting odd results? Read the <a href="#guide">prompt guide</a>.</p>
+      </div>
+      <div class="panel s-history">
+        <h2 class="ph">History <span class="mono" id="stHistCount">0</span></h2>
+        <ol id="stHistory"><li class="empty">Parts you generate in this session appear here so you can compare them.</li></ol>
+      </div>
+    </aside>
+
+    <section class="s-center" aria-label="Viewport">
+      <ol class="tracker" id="stTracker">
+        <li data-k="spec"><b>Spec read</b><span>waiting</span></li>
+        <li data-k="recipe"><b>Recipe</b><span>waiting</span></li>
+        <li data-k="route"><b>Route</b><span>waiting</span></li>
+        <li data-k="valid"><b>Validation</b><span>waiting</span></li>
+        <li data-k="export"><b>Export</b><span>waiting</span></li>
+      </ol>
+      <div class="s-view viewer">
+        <canvas id="stCanvas" aria-label="3D viewport showing the generated part" role="img"></canvas>
+        <div class="corner tl" id="stViewLabel">NO PART YET · UNITS mm</div>
+        <div class="s-tools">
+          <button class="btn ghost sm toggle" id="stXray" type="button" aria-pressed="false">X-ray</button>
+          <button class="btn ghost sm toggle" id="stDims" type="button" aria-pressed="true">Dimensions</button>
+          <button class="btn ghost sm" id="stReset" type="button">Reset view</button>
+        </div>
+        <div class="s-bot">
+          <canvas id="stRobot" aria-label="Robot assistant" role="img"></canvas>
+          <p class="bubble" id="stBubble" aria-live="polite">Describe a part with sizes in mm and press Generate.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="s-right">
+      <section class="panel">
+        <h2 class="ph">What I understood</h2>
+        <p class="spec-line" id="stSpecLine">Nothing yet.</p>
+        <dl class="spec" id="stSpec"></dl>
+      </section>
+      <section class="panel">
+        <h2 class="ph">Validation report</h2>
+        <ul class="checks sm" id="stChecks">
+          <li data-k="ast"><span class="box">✓</span>AST safety<small>–</small></li>
+          <li data-k="exec"><span class="box">✓</span>Execution<small>–</small></li>
+          <li data-k="water"><span class="box">✓</span>Watertight<small>–</small></li>
+          <li data-k="env"><span class="box">✓</span>Envelope<small>–</small></li>
+        </ul>
+        <div class="table-wrap">
+          <table class="env">
+            <thead><tr><th>Axis</th><th>Requested</th><th>Measured</th></tr></thead>
+            <tbody id="stEnv"><tr><td colspan="3" class="muted">Runs after a build.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="panel">
+        <h2 class="ph">Downloads</h2>
+        <div class="dl">
+          <button class="btn ghost sm" type="button" data-dl="stl" disabled>STL</button>
+          <button class="btn ghost sm" type="button" data-dl="glb" disabled>GLB</button>
+          <button class="btn ghost sm" type="button" data-dl="py" disabled>CadQuery .py</button>
+          <button class="btn ghost sm" type="button" data-dl="step" disabled title="STEP export runs on the CadQuery backend">STEP</button>
+        </div>
+        <p class="note" id="stDlNote">Downloads unlock when every check passes.</p>
+      </section>
+      <details class="panel code">
+        <summary>Generated CadQuery</summary>
+        <pre><code id="stCode"># Appears after a build</code></pre>
+      </details>
+    </aside>
+  </div>
+  <p class="demo-note container">Demo mode: this page runs a browser version of the pipeline with built-in templates for plates, bearing mounts, sensor brackets and shaft collars. The full model runs on the backend.</p>
+</div>
+
+<!-- ============ HOW IT WORKS ============ -->
+<div class="pg page" data-route="how" id="page-how" hidden>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">How it works</div>
+      <h1>From a sentence to a part, in real millimetres.</h1>
+      <p class="body">The technical deep dive. Click any box in the workflow to see what it does.</p>
+    </div>
+
+    <section class="sec">
+      <h2 class="h2s">The workflow</h2>
+      <div class="arch" id="arch">
+        <button class="node" type="button" data-n="prompt"><i>01</i><b>Prompt</b><span>plain language + mm</span></button>
+        <span class="link" aria-hidden="true"></span>
+        <button class="node" type="button" data-n="spec"><i>02</i><b>Spec parser</b><span>dimensions &amp; features</span></button>
+        <span class="link" aria-hidden="true"></span>
+        <button class="node" type="button" data-n="rag"><i>03</i><b>Recipe RAG</b><span>8 families + similarity</span></button>
+        <span class="link" aria-hidden="true"></span>
+        <button class="node" type="button" data-n="router"><i>04</i><b>Router</b><span>match or unknown?</span></button>
+        <span class="link" aria-hidden="true"></span>
+        <div class="fork">
+          <button class="node main" type="button" data-n="compiler"><i>05a</i><b>Deterministic compiler</b><span>known families</span></button>
+          <button class="node alt" type="button" data-n="qlora"><i>05b</i><b>Corrected QLoRA</b><span>everything else · ≤ 3 repairs</span></button>
+        </div>
+        <span class="link" aria-hidden="true"></span>
+        <button class="node" type="button" data-n="valid"><i>06</i><b>Validation chain</b><span>4 checks</span></button>
+        <span class="link" aria-hidden="true"></span>
+        <button class="node" type="button" data-n="export"><i>07</i><b>Export</b><span>STEP · STL · GLB</span></button>
+      </div>
+      <div class="arch-detail panel" id="archDetail" aria-live="polite"></div>
+    </section>
+
+    <section class="sec two">
+      <div>
+        <h2 class="h2s">The scale problem</h2>
+        <p class="body">We audited the numbers in the training code. Most of them were tiny, because the parts lived in a normalized coordinate space instead of real millimetres.</p>
+        <div class="stats">
+          <div class="stat"><b>≈ 0.0188</b><span>median numeric literal</span></div>
+          <div class="stat"><b>93.3%</b><span>of literals are ≤ 1.0</span></div>
+        </div>
+        <p class="body">The quick fix is to scale the output up afterwards, stretching each axis to the size you asked for. That breaks any part that isn't a cube: round holes turn into ellipses. Drag the slider to see it.</p>
+      </div>
+      <div class="panel scale-demo">
+        <div class="seg" role="group" aria-label="Scaling method">
+          <button type="button" class="segb" data-mode="axis" aria-pressed="true">Stretch each axis</button>
+          <button type="button" class="segb" data-mode="mm" aria-pressed="false">Build in real mm</button>
+        </div>
+        <svg id="scaleSvg" viewBox="0 0 360 260" role="img" aria-label="A plate with a round hole being scaled to 60 by 40 millimetres"></svg>
+        <label class="slider" for="scaleRange"><span>Normalized</span><input id="scaleRange" type="range" min="0" max="100" value="100"><span>60 × 40 mm</span></label>
+        <p class="note" id="scaleNote"></p>
+      </div>
+    </section>
+
+    <section class="sec two">
+      <div>
+        <h2 class="h2s">Recipe RAG</h2>
+        <p class="body">Each of the 8 engineering families has a recipe: what the part needs, in what order to build it, and what must be true when it's done. We retrieve the recipe, not a finished program.</p>
+        <div class="compare">
+          <div class="panel"><span class="tag-x">Retrieve full code</span><p>The model copies a whole program, its numbers included, and inherits the quirks of one example.</p></div>
+          <div class="panel good"><span class="tag-ok">Retrieve a recipe</span><p>The model gets the parameters and the build steps, and your numbers fill them in. Output stays short and easy to check.</p></div>
+        </div>
+      </div>
+      <div class="panel recipe">
+        <div class="recipe-head"><span class="mono">recipe</span><b>Split shaft collar</b><span class="chip">similarity <b>0.71</b></span></div>
+        <dl>
+          <dt>Parameters</dt><dd><span class="mm">bore Ø</span> <span class="mm">outer Ø</span> <span class="mm">width</span> <span class="mm">slot width</span></dd>
+          <dt>Build order</dt><dd>ring → bore → split slot</dd>
+          <dt>Constraints</dt><dd>bore smaller than outer Ø, wall thick enough to clamp</dd>
+          <dt>Expected envelope</dt><dd>outer Ø × outer Ø × width</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2 class="h2s">Compiler vs QLoRA</h2>
+      <div class="compare three">
+        <div class="panel"><span class="tag-ok">Deterministic compiler</span><p>Runs when the request confidently matches one of the 8 families. It fills the recipe with your numbers and writes the CadQuery code directly, so the size is exact.</p></div>
+        <div class="panel"><span class="tag-alt">Corrected QLoRA</span><p>Runs for everything else. A fine-tuned model writes the CadQuery code, with up to 3 repair loops if the code fails.</p></div>
+        <div class="panel"><span class="tag-x">Both must agree</span><p>For known families, the compiler's part and the model's part have to agree before the result is accepted. A disagreement is flagged, not hidden.</p></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2 class="h2s">The validation chain</h2>
+      <ol class="chain">
+        <li><b>AST safety</b><p>Reads the generated code before it runs and blocks anything outside CadQuery, such as imports or file access.</p></li>
+        <li><b>Isolated execution</b><p>Runs the code in a sandbox with a time limit, so a crash or an endless loop stays contained.</p></li>
+        <li><b>Watertight</b><p>Checks that the mesh is closed, with no gaps or flipped faces, so it can actually be printed.</p></li>
+        <li><b>Envelope</b><p>Measures the part's bounding box and compares it with the millimetres you asked for.</p></li>
+      </ol>
+    </section>
+  </div>
+</div>
+
+<!-- ============ LIBRARY ============ -->
+<div class="pg page" data-route="library" id="page-library" hidden>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Part library</div>
+      <h1>The 8 engineering families.</h1>
+      <p class="body">These families go through the deterministic compiler, so they come out at exact size. Anything else falls back to the QLoRA model. Pick a family and open it in Studio with a prompt ready to go.</p>
+    </div>
+    <div class="lib-grid" id="libGrid"></div>
+  </div>
+  <canvas id="libCanvas" class="lib-canvas" aria-hidden="true"></canvas>
+</div>
+
+<!-- ============ RESULTS ============ -->
+<div class="pg page" data-route="results" id="page-results" hidden>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Results &amp; research</div>
+      <h1>The lab notebook.</h1>
+    </div>
+    <div class="panel pending-page">
+      <div class="lockmark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="21" width="30" height="21" rx="4"/><path d="M15 21v-6a9 9 0 0 1 18 0v6"/></svg>
+      </div>
+      <h2>Results are being re-run.</h2>
+      <p class="body">We switched to a new dataset, so this page is empty until the new runs are done. Nothing here will be filled in from the old runs.</p>
+      <div class="row"><a class="btn ghost" href="#how">How it works</a><a class="btn" href="#studio">Try Mujassam</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div class="pg page" data-route="about" id="page-about" hidden>
+  <div class="container">
+    <div class="about-hero">
+      <div class="page-head">
+        <div class="eyebrow">About the team</div>
+        <h1>The people at the bench.</h1>
+        <p class="body">Mujassam was built during the <strong>Generative AI Application Engineering</strong> bootcamp, October 2026.</p>
+        <div class="row"><a class="btn ghost" href="https://github.com/Alreem-ai" target="_blank" rel="noopener">GitHub</a></div>
+      </div>
+      <canvas id="aboutCanvas" aria-label="The robot sitting at a table with the team" role="img"></canvas>
+    </div>
+    <div class="team" id="team">
+      <article class="member"><div class="avatar" aria-hidden="true">01</div><h3>Alreem Aldossary</h3><p class="role">Role</p><p>What she built.</p></article>
+      <article class="member"><div class="avatar" aria-hidden="true">02</div><h3>Ghaida Alsalamah</h3><p class="role">Role</p><p>What she built.</p></article>
+      <article class="member placeholder"><div class="avatar" aria-hidden="true">03</div><h3>Team member</h3><p class="role">Role</p><p>What they built.</p></article>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROMPT GUIDE ============ -->
+<div class="pg page" data-route="guide" id="page-guide" hidden>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Prompt guide</div>
+      <h1>How to ask for a part.</h1>
+      <p class="body">Clear requests build first time. Vague ones make the robot guess, and guessing is how parts come out the wrong size.</p>
+    </div>
+    <ol class="rules">
+      <li><b>Always give millimetres.</b><span>Write <span class="mm">60 × 40 × 5 mm</span>, not "small" or "about this big".</span></li>
+      <li><b>Name the part type.</b><span>Plate, bearing mount, bracket, shaft collar. The name picks the recipe.</span></li>
+      <li><b>List features with their sizes.</b><span>Hole <span class="mm">Ø</span>, how many, and where: <span class="mm">4 holes Ø5 mm, 6 mm from each corner</span>.</span></li>
+    </ol>
+    <section class="sec">
+      <h2 class="h2s">Vague vs good</h2>
+      <div class="pairs">
+        <div class="pair"><p class="vague">plate with some holes</p><p class="good">Plate 60 × 40 × 5 mm with 4 holes Ø5 mm, 6 mm from each corner</p></div>
+        <div class="pair"><p class="vague">a small bracket</p><p class="good">U sensor bracket 50 × 30 × 35 mm, 5 mm thick, Ø10 mm sensor hole</p></div>
+        <div class="pair"><p class="vague">collar for my shaft</p><p class="good">Split shaft collar, 16 mm bore, 32 mm OD, 12 mm wide</p></div>
+      </div>
+    </section>
+    <section class="sec guide-check">
+      <div class="panel">
+        <h2 class="h2s">Check your prompt</h2>
+        <label for="gPrompt" class="sr">Your prompt</label>
+        <textarea id="gPrompt" rows="3" placeholder="Type a request, e.g. plate with holes"></textarea>
+        <ul class="checks sm" id="gChecks">
+          <li data-k="mm"><span class="box">✓</span>Gives sizes in mm</li>
+          <li data-k="type"><span class="box">✓</span>Names the part type</li>
+          <li data-k="size"><span class="box">✓</span>Overall size, like W × D × H</li>
+          <li data-k="dia"><span class="box">✓</span>Feature sizes, like hole Ø</li>
+          <li data-k="count"><span class="box">✓</span>How many features, or where</li>
+        </ul>
+        <div class="row"><button class="btn" type="button" id="gOpen">Open in Studio</button></div>
+      </div>
+      <canvas id="guideCanvas" aria-label="The robot scoring your prompt" role="img"></canvas>
+    </section>
+  </div>
+</div>
+
+<!-- ============ 404 ============ -->
+<div class="pg page" data-route="404" id="page-404" hidden>
+  <div class="container nf">
+    <canvas id="nfCanvas" aria-label="The robot holding a tiny part through a magnifying glass" role="img"></canvas>
+    <div class="nf-text">
+      <div class="eyebrow">Error 404</div>
+      <h1>This page came out at 0.0188 scale.</h1>
+      <p class="body">We looked everywhere, magnifier and all. The page you asked for doesn't exist, or it's too small to find.</p>
+      <div class="row"><a class="btn" href="#home">Back to home</a><a class="btn ghost" href="#studio">Try Mujassam</a></div>
+    </div>
+  </div>
+</div>
+
+</main>
+<footer class="base">
+  <div class="container">
+    <span>© 2026 Mujassam · <span lang="ar">مجسّم</span></span>
+    <nav class="flinks" aria-label="Footer">
+      <a href="#studio">Studio</a><a href="#how">How It Works</a><a href="#library">Library</a><a href="#guide">Prompt guide</a><a href="#results">Results</a><a href="#about">About</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
