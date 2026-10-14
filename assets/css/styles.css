@@ -252,20 +252,7 @@ textarea:focus { outline: none; border-color: var(--orange); }
 .hist span { font: .74rem var(--font-mono); color: var(--muted); }
 
 .s-center { display: grid; gap: 10px; min-width: 0; }
-.tracker { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
-.tracker li { position: relative; display: grid; gap: 2px; padding: 8px 8px 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(10,22,40,.75); transition: border-color .3s, background .3s; min-width: 0; }
-.tracker li::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--line); transition: background .3s; }
-.tracker b { font: 600 .68rem var(--font-mono); letter-spacing: .06em; white-space: nowrap; text-transform: uppercase; }
-.tracker span { font: .72rem var(--font-mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tracker li.run { border-color: var(--cyan-dim); }
-.tracker li.run::before { background: var(--cyan); animation: blink .8s ease-in-out infinite; }
-.tracker li.ok::before { background: var(--cyan); }
-.tracker li.ok span { color: var(--ink); }
-.tracker li.fail { border-color: rgba(255,138,42,.7); }
-.tracker li.fail::before { background: var(--orange); }
-.tracker li.fail span { color: var(--orange); }
-@keyframes blink { 50% { opacity: .3; } }
-.s-view canvas#stCanvas { height: clamp(420px, calc(100vh - 210px), 760px); cursor: grab; touch-action: none; }
+.s-view canvas#stCanvas { height: clamp(420px, calc(100vh - 150px), 800px); cursor: grab; touch-action: none; }
 .s-tools { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .s-bot { position: absolute; left: 8px; bottom: 6px; display: flex; align-items: flex-end; gap: 6px; pointer-events: none; max-width: calc(100% - 16px); }
 .s-bot canvas { width: 150px; height: 170px; flex: none; }
@@ -344,10 +331,6 @@ textarea:focus { outline: none; border-color: var(--orange); }
   .navright .btn { padding: 9px 12px; font-size: .82rem; }
   .studio { grid-template-columns: minmax(0, 1fr); padding-top: 80px; }
   .s-right { grid-template-columns: minmax(0, 1fr); }
-  .tracker { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
-  .tracker li { padding: 7px 6px 7px 9px; }
-  .tracker b { font-size: .6rem; letter-spacing: .02em; }
-  .tracker span { display: none; }
   .s-view canvas#stCanvas { height: 62vh; }
   .s-view .corner.tl { top: 52px; right: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .s-bot canvas { width: 104px; height: 120px; }

@@ -1020,9 +1020,6 @@
     SR.resize();
 
     /* pipeline UI */
-    const trackEls = {}; document.querySelectorAll('#stTracker li').forEach(li => { trackEls[li.dataset.k] = li; });
-    function setTrack(k, cls, text) { const li = trackEls[k]; li.className = cls || ''; li.querySelector('span').textContent = text; li.title = text; }
-    const snapTrack = () => Object.keys(trackEls).map(k => [k, trackEls[k].className, trackEls[k].querySelector('span').textContent]);
     const bubble = $('stBubble');
     function say(text, fail) { bubble.textContent = text; bubble.classList.toggle('fail', !!fail); }
     const dlBtns = [...document.querySelectorAll('[data-dl]')], dlNote = $('stDlNote');
@@ -1063,7 +1060,6 @@
     }
     function restore(h) {
       active = h; $('stPrompt').value = h.spec.text;
-      h.track.forEach(([k, cls, txt]) => setTrack(k, cls, txt));
       showSpec(h.spec);
       $('stCode').textContent = h.code || '# No code: the request stopped before code generation.';
       showPart(h.geos, h.meas || [60, 10, 40], true);
@@ -1078,43 +1074,37 @@
     async function run(prompt) {
       if (running) return; running = true;
       const go = $('stGo'); go.disabled = true;
-      Object.keys(trackEls).forEach(k => setTrack(k, '', 'waiting'));
       setDownloads(false);
       $('stCode').textContent = '# Writing…'; setBot('think'); say('Reading your request…');
       const entry = { spec: null, geos: null, meas: null, pass: false, code: '' };
       const finish = (msg, pass) => {
-        entry.message = msg; entry.pass = pass; entry.track = snapTrack();
+        entry.message = msg; entry.pass = pass;
         history.push(entry); active = entry; renderHistory();
         setBot(pass ? 'pass' : 'fail'); say(msg, !pass); running = false; go.disabled = false;
       };
 
-      setTrack('spec', 'run', 'reading…'); await wait(650);
+      await wait(650);
       const spec = parseSpec(prompt); entry.spec = spec; showSpec(spec);
       if (spec.fail) {
-        setTrack('spec', 'fail', 'couldn’t read'); entry.reasonShort = 'spec'; $('stCode').textContent = '# No code: the request needs sizes in mm.';
+        entry.reasonShort = 'spec'; $('stCode').textContent = '# No code: the request needs sizes in mm.';
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         return finish(spec.fail.reason, false);
       }
-      setTrack('spec', 'ok', spec.family ? FAMS[spec.family].name.toLowerCase() : 'unknown part');
-      setTrack('recipe', 'run', 'searching 16 families…'); say('Looking for the closest recipe…'); await wait(700);
+      say('Looking for the closest recipe…'); await wait(700);
       if (!spec.family) {
-        setTrack('recipe', 'fail', 'no match · ' + spec.similarity.toFixed(2));
-        setTrack('route', 'run', 'QLoRA fallback…'); await wait(650);
-        setTrack('route', 'fail', 'QLoRA · backend only'); entry.reasonShort = 'not in demo';
+        say('No family matches. Routing to the QLoRA fallback…'); await wait(650);
+        entry.reasonShort = 'not in demo';
         $('stCode').textContent = '# The QLoRA fallback writes this part on the backend.';
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         return finish('That part goes to the QLoRA fallback, which runs on the backend. Here I can build plates, bearing mounts, sensor brackets and shaft collars.', false);
       }
       const fam = FAMS[spec.family];
-      setTrack('recipe', 'ok', fam.route === 'compiler' ? fam.name.toLowerCase() + ' · ' + spec.similarity.toFixed(2) : 'no confident match · ' + spec.similarity.toFixed(2));
-      setTrack('route', 'run', 'routing…'); await wait(600);
-      setTrack('route', 'ok', fam.route === 'compiler' ? 'deterministic compiler' : 'QLoRA (demo template)');
+      await wait(600);
       say(fam.route === 'compiler' ? 'Known family. Compiling it with your numbers…' : 'No confident family match, so this goes the QLoRA route…');
       entry.code = cadquery(spec.family, spec.params, spec.label);
       $('stCode').textContent = entry.code;
       const pre = preflight(spec.family, spec.params);
       if (!pre.exec) { CURVE = 96; entry.geos = buildGeos(spec.family, spec.params); CURVE = 40; entry.meas = measure(entry.geos); }
-      setTrack('valid', 'run', 'checking…');
       if (entry.geos) { showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = spec.label.toUpperCase(); }
       else { showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm'; }
       const results = {
@@ -1124,16 +1114,16 @@
       let failed = null;
       for (const [k, name] of CHECKS) {
         if (failed) break;
-        setTrack('valid', 'run', name.toLowerCase() + '…'); await wait(380);
+        say('Checking ' + name.toLowerCase() + '…'); await wait(380);
         const r = results[k];
         if (r && r !== 'skip') failed = [name, r];
       }
       if (failed) {
-        setTrack('valid', 'fail', failed[0].toLowerCase() + ' failed'); setTrack('export', 'fail', 'locked'); entry.reasonShort = failed[0].toLowerCase();
+        entry.reasonShort = failed[0].toLowerCase();
         return finish(failed[0] + ' failed: ' + failed[1], false);
       }
-      setTrack('valid', 'ok', '4 / 4 passed'); setTrack('export', 'run', 'packing…'); await wait(450);
-      setTrack('export', 'ok', 'STL · GLB · .py ready'); setDownloads(true);
+      say('Packing your files…'); await wait(450);
+      setDownloads(true);
       const m = entry.meas;
       finish('Envelope matches: ' + m[0].toFixed(2) + ' × ' + m[2].toFixed(2) + ' × ' + m[1].toFixed(2) + ' mm. Your files are ready.', true);
     }
