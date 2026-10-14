@@ -1100,8 +1100,8 @@
     }
     const wait = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 120) : ms));
 
-    /* the real backend: the QLoRA model on the Mujassam Hugging Face Space */
-    const API = (new URLSearchParams(location.search).get('backend') || window.MUJASSAM_API || 'https://alreemdoss-mujassam.hf.space').replace(/\/+$/, '');
+    /* the real backend: the Mujassam API gateway Space, which runs the QLoRA model Space on the owner's GPU quota */
+    const API = (new URLSearchParams(location.search).get('backend') || window.MUJASSAM_API || 'https://alreemdoss-mujassam-api.hf.space').replace(/\/+$/, '');
     const API_ROUNDS = 2, API_TOLERANCE = 0.8, API_TIMEOUT_MS = 6 * 60 * 1000;
     async function callBackend(prompt) {
       const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), API_TIMEOUT_MS);
@@ -1191,90 +1191,53 @@
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         return finish(spec.fail.reason, false);
       }
-      setTrack('spec', 'ok', spec.family ? FAMS[spec.family].name.toLowerCase() : 'unknown part');
-      setTrack('recipe', 'run', 'searching 8 families…'); say('Looking for the closest recipe…'); await wait(700);
-      if (!spec.family || FAMS[spec.family].route === 'qlora') {
-        setTrack('recipe', spec.family ? 'ok' : 'fail', (spec.family ? 'no confident match · ' : 'no match · ') + spec.similarity.toFixed(2));
-        setTrack('route', 'run', 'QLoRA model on the backend…');
-        say('No compiler recipe for this one, so the fine-tuned model writes it on the backend. The first run can take a minute or two while the GPU wakes up…');
-        $('stCode').textContent = '# The QLoRA model is writing CadQuery on the backend…';
-        showPart(null); $('stViewLabel').textContent = 'QLORA · WRITING CADQUERY';
-        let data = null, err = null;
-        try { data = await callBackend(prompt); } catch (e) { err = e; }
-        if (!data || data.ok === undefined) {
-          setTrack('route', 'fail', 'backend unreachable');
-          if (spec.family) {
-            say('The backend didn’t answer (' + (err ? err.message : 'no data') + '), so I’ll use the browser’s demo template.'); await wait(900);
-          } else {
-            entry.reasonShort = 'backend offline'; $('stCode').textContent = '# The backend did not answer.';
-            return finish('I couldn’t reach the QLoRA backend: ' + (err ? err.message : 'no data') + '. Try again in a minute, or build a plate, bearing mount, sensor bracket or shaft collar here.', false);
-          }
-        } else {
-          entry.backend = data; entry.code = data.code || '';
-          $('stCode').textContent = entry.code || '# The backend returned no code.';
-          const ran = data.rounds > 0;
-          setTrack('route', ran ? 'ok' : 'fail', ran ? 'QLoRA · ' + data.rounds + ' attempt' + (data.rounds === 1 ? '' : 's') : 'QLoRA · not run');
-          if (data.refused || !data.attempts || !data.attempts.length) {
-            setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked');
-            const quota = /ZeroGPU quota|GPU duration/i.test(data.headline || '');
-            entry.reasonShort = data.refused ? 'refused' : quota ? 'GPU quota' : 'not built';
-            return finish(quota
-              ? 'The free GPU time for today has run out for your connection, so the model couldn’t run. Try again later, or build a bearing mount, sensor bracket or shaft collar here.'
-              : (data.headline || 'The backend could not build this request.'), false);
-          }
-          const last = data.attempts[data.attempts.length - 1];
-          if (data.ok && data.glb_b64) {
-            try { entry.geos = await glbToGeos(data.glb_b64); entry.meas = measure(entry.geos); } catch (e) { entry.geos = null; }
-          }
-          if (!data.ok || !entry.geos) {
-            setTrack('valid', 'fail', (last.stage || 'check') + ' gate'); setTrack('export', 'fail', 'locked'); entry.reasonShort = last.stage || 'fail';
-            showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
-            const why = (last.failures || []).slice(0, 2).join(' ');
-            return finish((data.headline || 'The model’s part did not pass the checks.') + (why ? ' ' + why : ''), false);
-          }
-          // Describe the backend's part by the request and its measured box, not the browser's quick parse.
-          const t = spec.text || 'QLoRA part';
-          spec.label = t.length > 42 ? t.slice(0, 40) + '…' : t;
-          spec.features = []; spec.assumed = [];
-          if (Array.isArray(data.bbox_mm) && data.bbox_mm.length === 3) spec.envelope = [data.bbox_mm[0], data.bbox_mm[2], data.bbox_mm[1]];
-          showSpec(spec);
-          showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = ('QLoRA · ' + spec.label).toUpperCase();
-          setTrack('valid', 'ok', 'passed on the backend'); setTrack('export', 'ok', 'STEP · STL · GLB ready'); setDownloads(true);
-          const m = entry.meas;
-          return finish(data.headline + ' Measured ' + m[0].toFixed(2) + ' × ' + m[2].toFixed(2) + ' × ' + m[1].toFixed(2) + ' mm. Your files are ready.', true);
-        }
+      setTrack('spec', 'ok', spec.family ? FAMS[spec.family].name.toLowerCase() : 'free-form part');
+      // Every part is written by the fine-tuned QLoRA model on the backend: no browser compiler, no template fallback.
+      setTrack('recipe', 'ok', 'recipe RAG on the backend');
+      setTrack('route', 'run', 'QLoRA model on the backend…');
+      say('The fine-tuned model is writing your part on the backend. This takes about a minute (longer if the GPU is waking up)…');
+      $('stCode').textContent = '# The QLoRA model is writing CadQuery on the backend…';
+      showPart(null); $('stViewLabel').textContent = 'QLORA · WRITING CADQUERY';
+      let data = null, err = null;
+      try { data = await callBackend(prompt); } catch (e) { err = e; }
+      if (!data || data.ok === undefined) {
+        setTrack('route', 'fail', 'backend unreachable'); setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked');
+        entry.reasonShort = 'backend offline'; $('stCode').textContent = '# The model backend did not answer.';
+        showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
+        return finish('I couldn’t reach the model: ' + (err ? err.message : 'no data') + '. Try again in a minute.', false);
       }
-      const fam = FAMS[spec.family];
-      setTrack('recipe', 'ok', fam.route === 'compiler' ? fam.name.toLowerCase() + ' · ' + spec.similarity.toFixed(2) : 'no confident match · ' + spec.similarity.toFixed(2));
-      setTrack('route', 'run', 'routing…'); await wait(600);
-      setTrack('route', 'ok', fam.route === 'compiler' ? 'deterministic compiler' : 'QLoRA (demo template)');
-      say(fam.route === 'compiler' ? 'Known family. Compiling it with your numbers…' : 'No confident family match, so this goes the QLoRA route…');
-      entry.code = cadquery(spec.family, spec.params, spec.label);
-      $('stCode').textContent = entry.code;
-      const pre = preflight(spec.family, spec.params);
-      if (!pre.exec) { CURVE = 96; entry.geos = buildGeos(spec.family, spec.params); CURVE = 40; entry.meas = measure(entry.geos); }
-      setTrack('valid', 'run', 'checking…');
-      if (entry.geos) { showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = spec.label.toUpperCase(); }
-      else { showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm'; }
-      const results = {
-        ast: null, exec: pre.exec, water: pre.exec ? 'skip' : pre.water,
-        env: pre.exec || pre.water ? 'skip' : (entry.meas.every((v, i) => Math.abs(v - spec.envelope[i]) <= .1) ? null : 'Measured box doesn’t match the request.'),
-      };
-      let failed = null;
-      for (const [k, name] of CHECKS) {
-        if (failed) break;
-        setTrack('valid', 'run', name.toLowerCase() + '…'); await wait(380);
-        const r = results[k];
-        if (r && r !== 'skip') failed = [name, r];
+      entry.backend = data; entry.code = data.code || '';
+      $('stCode').textContent = entry.code || '# The backend returned no code.';
+      const ran = data.rounds > 0;
+      setTrack('route', ran ? 'ok' : 'fail', ran ? 'QLoRA · ' + data.rounds + ' attempt' + (data.rounds === 1 ? '' : 's') : 'QLoRA · not run');
+      if (data.refused || !data.attempts || !data.attempts.length) {
+        setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked');
+        const quota = /ZeroGPU|GPU quota|runs limit|GPU duration/i.test(data.headline || '');
+        entry.reasonShort = data.refused ? 'refused' : quota ? 'GPU quota' : 'not built';
+        return finish(quota
+          ? 'The model’s GPU time for today has run out, so it couldn’t run. Please try again later.'
+          : (data.headline || 'The backend could not build this request.'), false);
       }
-      if (failed) {
-        setTrack('valid', 'fail', failed[0].toLowerCase() + ' failed'); setTrack('export', 'fail', 'locked'); entry.reasonShort = failed[0].toLowerCase();
-        return finish(failed[0] + ' failed: ' + failed[1], false);
+      const last = data.attempts[data.attempts.length - 1];
+      if (data.ok && data.glb_b64) {
+        try { entry.geos = await glbToGeos(data.glb_b64); entry.meas = measure(entry.geos); } catch (e) { entry.geos = null; }
       }
-      setTrack('valid', 'ok', '4 / 4 passed'); setTrack('export', 'run', 'packing…'); await wait(450);
-      setTrack('export', 'ok', 'STL · GLB · .py ready'); setDownloads(true);
+      if (!data.ok || !entry.geos) {
+        setTrack('valid', 'fail', (last.stage || 'check') + ' gate'); setTrack('export', 'fail', 'locked'); entry.reasonShort = last.stage || 'fail';
+        showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
+        const why = (last.failures || []).slice(0, 2).join(' ');
+        return finish((data.headline || 'The model’s part did not pass the checks.') + (why ? ' ' + why : ''), false);
+      }
+      // Describe the backend's part by the request and its measured box, not the browser's quick parse.
+      const t = spec.text || 'QLoRA part';
+      spec.label = t.length > 42 ? t.slice(0, 40) + '…' : t;
+      spec.features = []; spec.assumed = [];
+      if (Array.isArray(data.bbox_mm) && data.bbox_mm.length === 3) spec.envelope = [data.bbox_mm[0], data.bbox_mm[2], data.bbox_mm[1]];
+      showSpec(spec);
+      showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = ('QLoRA · ' + spec.label).toUpperCase();
+      setTrack('valid', 'ok', 'passed on the backend'); setTrack('export', 'ok', 'STEP · STL · GLB ready'); setDownloads(true);
       const m = entry.meas;
-      finish('Envelope matches: ' + m[0].toFixed(2) + ' × ' + m[2].toFixed(2) + ' × ' + m[1].toFixed(2) + ' mm. Your files are ready.', true);
+      return finish(data.headline + ' Measured ' + m[0].toFixed(2) + ' × ' + m[2].toFixed(2) + ' × ' + m[1].toFixed(2) + ' mm. Your files are ready.', true);
     }
     $('stForm').addEventListener('submit', e => { e.preventDefault(); run($('stPrompt').value); });
     $('stPrompt').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); run($('stPrompt').value); } });
