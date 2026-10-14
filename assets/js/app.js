@@ -42,7 +42,7 @@
 
   /* ---------- How it works: architecture diagram ---------- */
   const ARCH = {
-    prompt: ['Prompt', 'A plain-language request with its sizes in millimetres, like “Split shaft collar, 16 mm bore, 32 mm OD, 12 mm wide”.'],
+    prompt: ['Prompt', 'A plain-language request with its sizes in millimetres, like “Split shaft collar, overall 32 x 32 x 12 mm, 12 mm bore”.'],
     spec: ['Spec parser', 'Pulls out the part type, every dimension in mm and each feature (hole Ø, count, position) into a structured spec. Studio shows it to you, so a misread is caught before anything is built.'],
     rag: ['Recipe RAG', 'Compares the spec with the 8 engineering families and retrieves the closest recipe, together with its similarity score.'],
     router: ['Router', 'A confident family match goes to the deterministic compiler. Anything else goes to the corrected QLoRA fallback.'],
@@ -112,7 +112,7 @@
     guide.typed = t.trim().length > 0;
   }
   gPrompt.addEventListener('input', checkPrompt);
-  document.getElementById('gOpen').addEventListener('click', () => openInStudio(gPrompt.value.trim() || 'Plate 60 × 40 × 5 mm with 4 holes Ø5 mm, 6 mm from each corner'));
+  document.getElementById('gOpen').addEventListener('click', () => openInStudio(gPrompt.value.trim() || 'Mounting plate, overall 60 x 40 x 5 mm, four 5 mm holes, each 6 mm from the corner edges.'));
   /* ---------- Spec parsing, demo routing and CadQuery code (shared by Studio + Guide) ---------- */
   const FAMS = {
     plate:   { name: 'Plate', core: /\b(plate|sheet|panel)\b/, words: ['plate', 'sheet', 'panel', 'mounting', 'base', 'flat'], route: 'qlora' },
@@ -1186,7 +1186,9 @@
 
       setTrack('spec', 'run', 'reading…'); await wait(650);
       const spec = parseSpec(prompt); entry.spec = spec; showSpec(spec);
-      if (spec.fail) {
+      // Only an empty request or one without mm sizes stops here; anything else goes to the model,
+      // which reads the spec itself (the browser's per-family parser is just a preview).
+      if (spec.fail && !spec.family) {
         setTrack('spec', 'fail', 'couldn’t read'); entry.reasonShort = 'spec'; $('stCode').textContent = '# No code: the request needs sizes in mm.';
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         return finish(spec.fail.reason, false);
@@ -1301,11 +1303,11 @@
   /* ===== Library: 8 family cards, one shared WebGL canvas drawn into each card ===== */
   const LIB = [
     { k: 'bearing', name: 'Flanged bearing mount', desc: 'A square flange with four bolt holes and a raised boss that holds a bearing.', dims: '48 × 48 × 18 mm',
-      prompts: ['Flanged bearing mount 48 × 48 × 18 mm, 16 mm bore, 4 holes Ø5.5 mm', 'Bearing mount 60 × 60 × 20 mm, 20 mm bore, 4 holes Ø6.5 mm'] },
+      prompts: ['Flanged bearing mount, overall 48 x 48 x 18 mm, 16 mm central bore, four 5.5 mm mounting holes on a 36 mm square pattern.', 'Flanged bearing mount, overall 60 x 60 x 20 mm, 20 mm central bore, four 6.5 mm mounting holes on a 46 mm square pattern.'] },
     { k: 'bracket', name: 'U-shaped sensor bracket', desc: 'Two side walls on a base, with a matching hole in each wall to hold a sensor.', dims: '50 × 30 × 35 mm',
-      prompts: ['U sensor bracket 50 × 30 × 35 mm, 5 mm thick, Ø10 mm sensor hole', 'U bracket 40 × 25 × 30 mm, 4 mm thick, Ø8 mm sensor hole'] },
+      prompts: ['U-shaped sensor bracket, overall 50 x 30 x 35 mm, 3 mm walls, two 4 mm base holes and one 6 mm pivot hole through both side walls.', 'U-shaped sensor bracket, overall 40 x 25 x 30 mm, 3 mm walls, two 4 mm base holes and one 8 mm sensor hole through both side walls.'] },
     { k: 'collar', name: 'Split shaft collar', desc: 'A ring that clamps onto a shaft. The split slot lets it tighten.', dims: '≈ 32 × 32 × 12 mm',
-      prompts: ['Split shaft collar, 16 mm bore, 32 mm OD, 12 mm wide', 'Shaft collar, 10 mm bore, 24 mm OD, 9 mm wide'] },
+      prompts: ['Split shaft collar, overall 32 x 32 x 12 mm, 12 mm bore, 4 mm radial clamp bolt hole and a 2 mm split slot.', 'Split shaft collar, overall 24 x 24 x 9 mm, 10 mm bore, 3 mm radial clamp bolt hole and a 2 mm split slot.'] },
     null, null, null, null, null,
   ];
   function initLibrary() {
