@@ -69,6 +69,5 @@ The Studio demo has built-in templates for plates, bearing mounts, sensor bracke
 
 ## To do
 
-- [ ] Fill in the team cards on the About page.
 - [ ] Connect Studio to the real backend (QLoRA fallback, STEP export).
 - [ ] Replace the procedural gallery models with the pipeline's GLB outputs.
