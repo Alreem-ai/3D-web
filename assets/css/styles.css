@@ -294,10 +294,6 @@ textarea:focus { outline: none; border-color: var(--orange); }
 .lcard.placeholder h3, .lcard.placeholder .dims { color: var(--muted); }
 .lib-canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
-/* Results */
-.pending-page { max-width: 46rem; padding: 32px; gap: 16px; margin-bottom: 80px; border-style: dashed; border-color: var(--cyan-dim); }
-.pending-page h2 { font-size: 1.6rem; }
-.lockmark { width: 44px; height: 44px; color: var(--cyan); }
 
 /* About */
 .about-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px; align-items: center; }

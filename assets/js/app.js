@@ -9,7 +9,7 @@
   document.querySelectorAll('.bar .fill').forEach(f => { f.style.width = f.dataset.w + '%'; });
 
   /* ---------- Router: one page per hash (#studio, #library, …) ---------- */
-  const ROUTES = ['home', 'studio', 'library', 'results', 'about', 'guide'];
+  const ROUTES = ['home', 'studio', 'library', 'about', 'guide'];
   const routeEls = [...document.querySelectorAll('.pg')];
   const navLinks = [...document.querySelectorAll('[data-nav]')];
   const menuBtn = document.getElementById('menuBtn'), navEl = document.getElementById('navlinks');
