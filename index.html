@@ -17,9 +17,7 @@
     <nav class="navlinks" id="navlinks" aria-label="Pages">
       <a href="#home" data-nav="home">Home</a>
       <a href="#studio" data-nav="studio">Studio</a>
-      <a href="#how" data-nav="how">How It Works</a>
       <a href="#library" data-nav="library">Library</a>
-      <a href="#results" data-nav="results">Results</a>
       <a href="#about" data-nav="about">About</a>
     </nav>
     <div class="navright">
@@ -39,7 +37,7 @@
         <div class="container" style="width:100%">
           <div class="card">
             <p class="brand"><span class="ar" lang="ar">مجسّم</span><span class="slash">/</span><span class="en">Mujassam</span></p>
-            <h1>Say it. Measure it. Make it.</h1>
+            <h1 class="steps-title"><span>Say it.</span><span>Measure it.</span><span>Make it.</span></h1>
             <p class="sub"><b>Natural language</b><span class="arr">→</span><b>validated CAD in real mm</b><span class="arr">→</span><b>STEP / STL / GLB</b></p>
             <div class="scrollhint"><i></i>Scroll to see how it gets the size right</div>
           </div>
@@ -72,7 +70,7 @@
           <div class="card">
             <div class="eyebrow">How it works · stage 2 of 5</div>
             <h3>Recipe RAG</h3>
-            <p class="body">The robot pulls the closest of <strong>8 engineering-family blueprints</strong> from the shelf and shows how similar it is to your request.</p>
+            <p class="body">The robot pulls the closest of <strong>16 engineering-family recipes</strong> from the shelf and shows how similar it is to your request.</p>
           </div>
         </div>
       </section>
@@ -160,19 +158,7 @@
     </div>
   </section>
 
-  <!-- 6: honest results -->
-  <section class="block" id="results-sec">
-    <div class="container">
-      <div class="head">
-        <div class="eyebrow">Honest results · lab notebook</div>
-        <h2>New numbers are on the way.</h2>
-        <p class="body">We switched to a new dataset, so every result is being re-run from scratch. We'll publish them on the Results page once the runs are done, labelled as development or locked-test results.</p>
-        <div class="row"><a class="btn ghost" href="#results">Open the Results page</a></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7: footer CTA -->
+  <!-- 6: footer CTA -->
   <section class="block" id="cta-sec">
     <div class="container cta">
       <div class="head" style="margin:0">
@@ -180,7 +166,6 @@
         <h2>Real millimetres, ready to open.</h2>
         <div class="links">
           <a href="#library"><strong>Part library</strong><span>the engineering families</span></a>
-          <a href="#results"><strong>Results &amp; research</strong><span>the lab notebook</span></a>
           <a href="#about" class="hl"><strong>Meet the team</strong><span>who built Mujassam</span></a>
         </div>
       </div>
@@ -217,13 +202,6 @@
     </aside>
 
     <section class="s-center" aria-label="Viewport">
-      <ol class="tracker" id="stTracker">
-        <li data-k="spec"><b>Spec read</b><span>waiting</span></li>
-        <li data-k="recipe"><b>Recipe</b><span>waiting</span></li>
-        <li data-k="route"><b>Route</b><span>waiting</span></li>
-        <li data-k="valid"><b>Validation</b><span>waiting</span></li>
-        <li data-k="export"><b>Export</b><span>waiting</span></li>
-      </ol>
       <div class="s-view viewer">
         <canvas id="stCanvas" aria-label="3D viewport showing the generated part" role="img"></canvas>
         <div class="corner tl" id="stViewLabel">NO PART YET · UNITS mm</div>
@@ -264,129 +242,17 @@
   <p class="demo-note container">Every part is written by the fine-tuned QLoRA model on the backend (a Hugging Face Space), which writes the CadQuery, runs it, checks the size and sends back STEP, STL and GLB. Give the overall size in mm. A part takes about a minute.</p>
 </div>
 
-<!-- ============ HOW IT WORKS ============ -->
-<div class="pg page" data-route="how" id="page-how" hidden>
-  <div class="container">
-    <div class="page-head">
-      <div class="eyebrow">How it works</div>
-      <h1>From a sentence to a part, in real millimetres.</h1>
-      <p class="body">The technical deep dive. Click any box in the workflow to see what it does.</p>
-    </div>
-
-    <section class="sec">
-      <h2 class="h2s">The workflow</h2>
-      <div class="arch" id="arch">
-        <button class="node" type="button" data-n="prompt"><i>01</i><b>Prompt</b><span>plain language + mm</span></button>
-        <span class="link" aria-hidden="true"></span>
-        <button class="node" type="button" data-n="spec"><i>02</i><b>Spec parser</b><span>dimensions &amp; features</span></button>
-        <span class="link" aria-hidden="true"></span>
-        <button class="node" type="button" data-n="rag"><i>03</i><b>Recipe RAG</b><span>8 families + similarity</span></button>
-        <span class="link" aria-hidden="true"></span>
-        <button class="node" type="button" data-n="router"><i>04</i><b>Router</b><span>match or unknown?</span></button>
-        <span class="link" aria-hidden="true"></span>
-        <div class="fork">
-          <button class="node main" type="button" data-n="compiler"><i>05a</i><b>Deterministic compiler</b><span>known families</span></button>
-          <button class="node alt" type="button" data-n="qlora"><i>05b</i><b>Corrected QLoRA</b><span>everything else · ≤ 3 repairs</span></button>
-        </div>
-        <span class="link" aria-hidden="true"></span>
-        <button class="node" type="button" data-n="valid"><i>06</i><b>Validation chain</b><span>4 checks</span></button>
-        <span class="link" aria-hidden="true"></span>
-        <button class="node" type="button" data-n="export"><i>07</i><b>Export</b><span>STEP · STL · GLB</span></button>
-      </div>
-      <div class="arch-detail panel" id="archDetail" aria-live="polite"></div>
-    </section>
-
-    <section class="sec two">
-      <div>
-        <h2 class="h2s">The scale problem</h2>
-        <p class="body">We audited the numbers in the training code. Most of them were tiny, because the parts lived in a normalized coordinate space instead of real millimetres.</p>
-        <div class="stats">
-          <div class="stat"><b>≈ 0.0188</b><span>median numeric literal</span></div>
-          <div class="stat"><b>93.3%</b><span>of literals are ≤ 1.0</span></div>
-        </div>
-        <p class="body">The quick fix is to scale the output up afterwards, stretching each axis to the size you asked for. That breaks any part that isn't a cube: round holes turn into ellipses. Drag the slider to see it.</p>
-      </div>
-      <div class="panel scale-demo">
-        <div class="seg" role="group" aria-label="Scaling method">
-          <button type="button" class="segb" data-mode="axis" aria-pressed="true">Stretch each axis</button>
-          <button type="button" class="segb" data-mode="mm" aria-pressed="false">Build in real mm</button>
-        </div>
-        <svg id="scaleSvg" viewBox="0 0 360 260" role="img" aria-label="A plate with a round hole being scaled to 60 by 40 millimetres"></svg>
-        <label class="slider" for="scaleRange"><span>Normalized</span><input id="scaleRange" type="range" min="0" max="100" value="100"><span>60 × 40 mm</span></label>
-        <p class="note" id="scaleNote"></p>
-      </div>
-    </section>
-
-    <section class="sec two">
-      <div>
-        <h2 class="h2s">Recipe RAG</h2>
-        <p class="body">Each of the 8 engineering families has a recipe: what the part needs, in what order to build it, and what must be true when it's done. We retrieve the recipe, not a finished program.</p>
-        <div class="compare">
-          <div class="panel"><span class="tag-x">Retrieve full code</span><p>The model copies a whole program, its numbers included, and inherits the quirks of one example.</p></div>
-          <div class="panel good"><span class="tag-ok">Retrieve a recipe</span><p>The model gets the parameters and the build steps, and your numbers fill them in. Output stays short and easy to check.</p></div>
-        </div>
-      </div>
-      <div class="panel recipe">
-        <div class="recipe-head"><span class="mono">recipe</span><b>Split shaft collar</b><span class="chip">similarity <b>0.71</b></span></div>
-        <dl>
-          <dt>Parameters</dt><dd><span class="mm">bore Ø</span> <span class="mm">outer Ø</span> <span class="mm">width</span> <span class="mm">slot width</span></dd>
-          <dt>Build order</dt><dd>ring → bore → split slot</dd>
-          <dt>Constraints</dt><dd>bore smaller than outer Ø, wall thick enough to clamp</dd>
-          <dt>Expected envelope</dt><dd>outer Ø × outer Ø × width</dd>
-        </dl>
-      </div>
-    </section>
-
-    <section class="sec">
-      <h2 class="h2s">Compiler vs QLoRA</h2>
-      <div class="compare three">
-        <div class="panel"><span class="tag-ok">Deterministic compiler</span><p>Runs when the request confidently matches one of the 8 families. It fills the recipe with your numbers and writes the CadQuery code directly, so the size is exact.</p></div>
-        <div class="panel"><span class="tag-alt">Corrected QLoRA</span><p>Runs for everything else. A fine-tuned model writes the CadQuery code, with up to 3 repair loops if the code fails.</p></div>
-        <div class="panel"><span class="tag-x">Both must agree</span><p>For known families, the compiler's part and the model's part have to agree before the result is accepted. A disagreement is flagged, not hidden.</p></div>
-      </div>
-    </section>
-
-    <section class="sec">
-      <h2 class="h2s">The validation chain</h2>
-      <ol class="chain">
-        <li><b>AST safety</b><p>Reads the generated code before it runs and blocks anything outside CadQuery, such as imports or file access.</p></li>
-        <li><b>Isolated execution</b><p>Runs the code in a sandbox with a time limit, so a crash or an endless loop stays contained.</p></li>
-        <li><b>Watertight</b><p>Checks that the mesh is closed, with no gaps or flipped faces, so it can actually be printed.</p></li>
-        <li><b>Envelope</b><p>Measures the part's bounding box and compares it with the millimetres you asked for.</p></li>
-      </ol>
-    </section>
-  </div>
-</div>
-
 <!-- ============ LIBRARY ============ -->
 <div class="pg page" data-route="library" id="page-library" hidden>
   <div class="container">
     <div class="page-head">
       <div class="eyebrow">Part library</div>
-      <h1>The 8 engineering families.</h1>
-      <p class="body">Pick a family and open it in Studio with a prompt ready to go. The fine-tuned QLoRA model writes the part and the backend checks it against your millimetres.</p>
+      <h1>The 16 engineering families.</h1>
+      <p class="body">Mujassam has a construction recipe for each of these families. When your request matches one, the model retrieves that recipe as its build plan, then writes the CadQuery code in your millimetres. Pick a family and open it in Studio with an example prompt ready to go.</p>
     </div>
     <div class="lib-grid" id="libGrid"></div>
   </div>
   <canvas id="libCanvas" class="lib-canvas" aria-hidden="true"></canvas>
-</div>
-
-<!-- ============ RESULTS ============ -->
-<div class="pg page" data-route="results" id="page-results" hidden>
-  <div class="container">
-    <div class="page-head">
-      <div class="eyebrow">Results &amp; research</div>
-      <h1>The lab notebook.</h1>
-    </div>
-    <div class="panel pending-page">
-      <div class="lockmark" aria-hidden="true">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="21" width="30" height="21" rx="4"/><path d="M15 21v-6a9 9 0 0 1 18 0v6"/></svg>
-      </div>
-      <h2>Results are being re-run.</h2>
-      <p class="body">We switched to a new dataset, so this page is empty until the new runs are done. Nothing here will be filled in from the old runs.</p>
-      <div class="row"><a class="btn ghost" href="#how">How it works</a><a class="btn" href="#studio">Try Mujassam</a></div>
-    </div>
-  </div>
 </div>
 
 <!-- ============ ABOUT ============ -->
@@ -402,9 +268,9 @@
       <canvas id="aboutCanvas" aria-label="The robot sitting at a table with the team" role="img"></canvas>
     </div>
     <div class="team" id="team">
-      <article class="member"><div class="avatar" aria-hidden="true">01</div><h3>Alreem Aldossary</h3><p class="role">Role</p><p>What she built.</p></article>
-      <article class="member"><div class="avatar" aria-hidden="true">02</div><h3>Ghaida Alsalamah</h3><p class="role">Role</p><p>What she built.</p></article>
-      <article class="member"><div class="avatar" aria-hidden="true">03</div><h3>Fahad</h3><p class="role">Role</p><p>What he built.</p></article>
+      <article class="member has-qr"><div class="m-info"><div class="avatar" aria-hidden="true">01</div><h3>Alreem Aldossary</h3><a class="linkedin" href="https://www.linkedin.com/in/alreem-r-aldossary-aa827030b" target="_blank" rel="noopener" aria-label="Alreem Aldossary on LinkedIn">LinkedIn <span aria-hidden="true">↗</span></a></div><a class="qr-link" href="https://www.linkedin.com/in/alreem-r-aldossary-aa827030b" target="_blank" rel="noopener" aria-label="Scan or open Alreem Aldossary's LinkedIn"><svg class="qr" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges"><path fill="#e8f1fb" d="M0 0h37v37H0z"/><path stroke="#0a1628" d="M2 2.5h7m2 0h1m3 0h3m2 0h2m2 0h2m2 0h7M2 3.5h1m5 0h1m2 0h1m2 0h4m2 0h1m3 0h2m2 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m2 0h2m2 0h1m2 0h1m2 0h2m1 0h2m2 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m2 0h1m2 0h6m4 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m7 0h1m4 0h5m2 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h2m2 0h2m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M11 9.5h1m1 0h2m2 0h5m1 0h1m1 0h1M2 10.5h1m2 0h1m1 0h2m1 0h4m1 0h2m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1M3 11.5h2m1 0h2m2 0h1m1 0h1m1 0h3m1 0h2m6 0h4m3 0h2M2 12.5h3m3 0h1m1 0h3m1 0h3m1 0h1m1 0h3m3 0h1m2 0h2m1 0h1m1 0h1M5 13.5h1m1 0h1m1 0h1m1 0h1m3 0h1m2 0h1m4 0h6m1 0h2m2 0h1M2 14.5h1m3 0h5m3 0h1m1 0h3m1 0h2m1 0h6m2 0h1m1 0h2M3 15.5h3m3 0h1m2 0h2m1 0h3m3 0h1m2 0h1m1 0h1m1 0h1m1 0h1m1 0h3M2 16.5h2m4 0h1m2 0h2m1 0h1m1 0h3m3 0h2m1 0h1m1 0h4m1 0h2M4 17.5h1m1 0h1m5 0h1m5 0h3m2 0h1m4 0h2m1 0h1m1 0h1M2 18.5h4m2 0h1m1 0h1m6 0h1m1 0h1m2 0h3m1 0h1m1 0h1m1 0h1m2 0h1M2 19.5h1m2 0h3m2 0h2m1 0h1m2 0h1m8 0h1m3 0h1m1 0h1m1 0h1M6 20.5h3m1 0h1m1 0h1m1 0h2m2 0h1m8 0h2m3 0h3M2 21.5h1m3 0h1m3 0h1m2 0h2m5 0h1m2 0h1m2 0h1m2 0h1m3 0h1M4 22.5h5m2 0h1m4 0h2m1 0h5m1 0h1m1 0h1m5 0h1M3 23.5h5m1 0h2m3 0h1m1 0h2m3 0h1m4 0h3m3 0h3M2 24.5h2m1 0h1m2 0h5m1 0h2m2 0h1m2 0h3m4 0h2m1 0h2m1 0h1M3 25.5h2m1 0h2m3 0h1m1 0h2m2 0h1m2 0h6m4 0h2m2 0h1M2 26.5h1m3 0h1m1 0h3m2 0h2m1 0h1m1 0h3m1 0h2m2 0h6m2 0h1M10 27.5h1m10 0h4m1 0h1m3 0h2m2 0h1M2 28.5h7m2 0h3m2 0h1m2 0h2m3 0h1m1 0h1m1 0h1m1 0h4M2 29.5h1m5 0h1m1 0h1m1 0h1m2 0h3m1 0h1m1 0h4m1 0h1m3 0h1m2 0h2M2 30.5h1m1 0h3m1 0h1m3 0h1m4 0h1m2 0h2m1 0h2m1 0h6m1 0h2M2 31.5h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h3m1 0h3m1 0h2m1 0h1m1 0h1M2 32.5h1m1 0h3m1 0h1m2 0h1m1 0h1m2 0h4m5 0h3m2 0h1m3 0h1M2 33.5h1m5 0h1m2 0h2m6 0h2m2 0h1m2 0h3m2 0h1M2 34.5h7m1 0h2m1 0h2m1 0h3m4 0h1m2 0h3m1 0h2m1 0h1"/></svg><span>Scan me</span></a></article>
+      <article class="member has-qr"><div class="m-info"><div class="avatar" aria-hidden="true">02</div><h3>Ghaida Alsalamah</h3><a class="linkedin" href="https://www.linkedin.com/in/ghaida-alsalamah-itil%C2%AE-4-ab0376368" target="_blank" rel="noopener" aria-label="Ghaida Alsalamah on LinkedIn">LinkedIn <span aria-hidden="true">↗</span></a></div><a class="qr-link" href="https://www.linkedin.com/in/ghaida-alsalamah-itil%C2%AE-4-ab0376368" target="_blank" rel="noopener" aria-label="Scan or open Ghaida Alsalamah's LinkedIn"><svg class="qr" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" shape-rendering="crispEdges"><path fill="#e8f1fb" d="M0 0h41v41H0z"/><path stroke="#0a1628" d="M2 2.5h7m1 0h1m2 0h1m1 0h2m1 0h4m3 0h2m1 0h1m3 0h7M2 3.5h1m5 0h1m1 0h2m2 0h4m2 0h1m1 0h3m3 0h1m1 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m3 0h2m2 0h1m3 0h2m2 0h4m2 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m3 0h1m2 0h1m1 0h1m1 0h5m2 0h2m1 0h2m1 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m2 0h4m4 0h1m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m4 0h1m2 0h1m1 0h3m2 0h1m1 0h1m4 0h1m1 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M11 9.5h1m2 0h2m1 0h2m2 0h1m1 0h1m3 0h1m1 0h2M2 10.5h1m2 0h8m4 0h2m1 0h4m1 0h2m1 0h1m1 0h2m2 0h1m1 0h3M3 11.5h1m5 0h1m2 0h2m5 0h1m2 0h3m3 0h4m2 0h2m1 0h1M4 12.5h2m1 0h2m4 0h2m1 0h1m2 0h1m3 0h1m2 0h1m2 0h1m2 0h2m4 0h1M3 13.5h2m4 0h2m1 0h1m2 0h3m1 0h1m8 0h1m6 0h4M5 14.5h4m3 0h1m3 0h1m1 0h1m2 0h2m3 0h1m2 0h2m1 0h1m2 0h1m2 0h1M2 15.5h1m3 0h2m1 0h4m4 0h4m4 0h1m1 0h5m2 0h2M3 16.5h1m4 0h1m2 0h3m2 0h2m1 0h1m1 0h4m4 0h1m2 0h1m1 0h3m1 0h1M2 17.5h1m1 0h1m2 0h1m1 0h2m1 0h3m3 0h3m1 0h1m2 0h1m2 0h1m1 0h1m2 0h1m1 0h2m1 0h1M2 18.5h1m5 0h3m1 0h1m1 0h1m2 0h3m1 0h3m2 0h1m1 0h1m1 0h3m1 0h1m1 0h2M2 19.5h1m2 0h2m6 0h1m1 0h2m1 0h3m1 0h2m1 0h2m1 0h4m1 0h1M2 20.5h4m2 0h1m2 0h1m5 0h1m1 0h2m1 0h1m2 0h3m1 0h1m2 0h1m1 0h1m1 0h1m1 0h1M2 21.5h1m2 0h2m2 0h2m2 0h1m1 0h1m10 0h3m1 0h2m2 0h2m2 0h1M2 22.5h2m1 0h5m2 0h1m2 0h1m1 0h3m4 0h1m1 0h1m1 0h1m1 0h5M2 23.5h1m1 0h1m4 0h2m4 0h1m1 0h1m2 0h2m1 0h3m2 0h2m1 0h1m2 0h1m1 0h1M3 24.5h2m1 0h6m1 0h5m1 0h2m3 0h2m2 0h2m2 0h2m1 0h1m2 0h1M2 25.5h1m2 0h1m4 0h3m2 0h1m3 0h1m3 0h2m1 0h1m5 0h5m1 0h1M2 26.5h1m1 0h5m1 0h1m2 0h1m4 0h4m1 0h1m1 0h4m1 0h1m1 0h2m3 0h2M2 27.5h3m1 0h1m4 0h1m1 0h3m2 0h2m1 0h3m1 0h2m2 0h1m2 0h4M2 28.5h2m1 0h1m1 0h2m2 0h2m1 0h1m1 0h1m1 0h1m2 0h2m4 0h1m1 0h1m1 0h3m1 0h4M2 29.5h1m1 0h1m1 0h2m1 0h1m2 0h1m1 0h4m2 0h1m1 0h1m2 0h1m5 0h1m1 0h1m1 0h2m1 0h1M2 30.5h1m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m7 0h1m1 0h1m1 0h2m1 0h8M10 31.5h2m2 0h4m3 0h2m1 0h1m2 0h1m2 0h1m3 0h1m1 0h2M2 32.5h7m1 0h3m1 0h4m3 0h7m2 0h1m1 0h1m1 0h1m3 0h1M2 33.5h1m5 0h1m1 0h1m4 0h1m3 0h4m1 0h2m1 0h4m3 0h1m2 0h2M2 34.5h1m1 0h3m1 0h1m1 0h2m2 0h1m1 0h2m5 0h3m3 0h6m2 0h1M2 35.5h1m1 0h3m1 0h1m1 0h1m5 0h1m1 0h1m1 0h1m5 0h3m3 0h1m4 0h1M2 36.5h1m1 0h3m1 0h1m2 0h4m2 0h2m1 0h3m1 0h1m2 0h1m2 0h2m2 0h1m2 0h2M2 37.5h1m5 0h1m2 0h2m1 0h2m2 0h2m1 0h2m2 0h1m4 0h3m1 0h5M2 38.5h7m1 0h2m1 0h3m1 0h2m3 0h1m2 0h2m1 0h1m1 0h1m1 0h2m1 0h1m2 0h1"/></svg><span>Scan me</span></a></article>
+      <article class="member has-qr"><div class="m-info"><div class="avatar" aria-hidden="true">03</div><h3>Fahad Alshehri</h3><a class="linkedin" href="https://www.linkedin.com/in/f-alshehrii" target="_blank" rel="noopener" aria-label="Fahad Alshehri on LinkedIn">LinkedIn <span aria-hidden="true">↗</span></a></div><a class="qr-link" href="https://www.linkedin.com/in/f-alshehrii" target="_blank" rel="noopener" aria-label="Scan or open Fahad Alshehri's LinkedIn"><svg class="qr" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#e8f1fb" d="M0 0h33v33H0z"/><path stroke="#0a1628" d="M2 2.5h7m2 0h1m4 0h1m1 0h5m1 0h7M2 3.5h1m5 0h1m2 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m6 0h1m3 0h1m2 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h3m2 0h1m4 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m2 0h5m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h3m1 0h1m2 0h2m5 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h3m3 0h3m2 0h2M2 10.5h1m1 0h5m4 0h5m1 0h3m2 0h5M3 11.5h1m2 0h1m2 0h1m1 0h1m1 0h1m1 0h1m2 0h4m1 0h4m3 0h1M4 12.5h3m1 0h2m2 0h3m2 0h1m1 0h1m4 0h1M2 13.5h2m1 0h2m2 0h1m1 0h1m1 0h1m2 0h2m3 0h3m1 0h1m1 0h1m1 0h1M3 14.5h3m2 0h1m1 0h5m4 0h1m1 0h1m5 0h2M2 15.5h4m1 0h1m1 0h1m1 0h1m2 0h2m2 0h7m1 0h1m3 0h1M2 16.5h1m1 0h2m1 0h2m3 0h2m1 0h4m1 0h1m1 0h4m1 0h2M3 17.5h1m2 0h2m2 0h2m2 0h2m9 0h2m2 0h1M2 18.5h2m1 0h4m1 0h1m1 0h2m2 0h4m1 0h1m3 0h1m1 0h2M2 19.5h2m5 0h4m5 0h9m1 0h1m1 0h1M2 20.5h1m1 0h1m2 0h3m2 0h3m2 0h1m1 0h1m4 0h2m2 0h1M2 21.5h1m6 0h1m2 0h3m1 0h3m1 0h1m1 0h5m2 0h1M2 22.5h1m2 0h2m1 0h2m2 0h1m6 0h2m1 0h5m1 0h3M10 23.5h2m3 0h2m1 0h3m1 0h1m3 0h5M2 24.5h7m2 0h1m1 0h1m1 0h5m1 0h2m1 0h1m1 0h3M2 25.5h1m5 0h1m1 0h1m1 0h1m1 0h2m1 0h1m3 0h2m3 0h1m3 0h1M2 26.5h1m1 0h3m1 0h1m1 0h2m1 0h1m2 0h2m1 0h1m2 0h5m1 0h1M2 27.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h1m1 0h4M2 28.5h1m1 0h3m1 0h1m1 0h4m3 0h3m1 0h1m1 0h7M2 29.5h1m5 0h1m3 0h1m1 0h1m2 0h2m1 0h1m1 0h4m1 0h1m1 0h1M2 30.5h7m1 0h2m1 0h4m2 0h3m2 0h5"/></svg><span>Scan me</span></a></article>
     </div>
   </div>
 </div>
@@ -467,7 +333,7 @@
   <div class="container">
     <span>© 2026 Mujassam · <span lang="ar">مجسّم</span></span>
     <nav class="flinks" aria-label="Footer">
-      <a href="#studio">Studio</a><a href="#how">How It Works</a><a href="#library">Library</a><a href="#guide">Prompt guide</a><a href="#results">Results</a><a href="#about">About</a>
+      <a href="#studio">Studio</a><a href="#library">Library</a><a href="#guide">Prompt guide</a><a href="#about">About</a>
     </nav>
   </div>
 </footer>
