@@ -50,7 +50,9 @@ The site is one `index.html` with hash routes:
 - **How it works**: click any box in the workflow diagram; drag the slider to compare stretching each axis with building in real mm.
 - **Prompt guide**: type a request and the live checker scores it out of 5, then opens it in Studio.
 
-The Studio demo has built-in templates for plates, bearing mounts, sensor brackets and shaft collars. Other parts are routed to the QLoRA fallback, which runs on the backend.
+Bearing mounts, sensor brackets and shaft collars are compiled in the browser. Plates and every other part are sent to the QLoRA backend: the [Mujassam Space](https://huggingface.co/spaces/AlreemDoss/mujassam) runs Qwen2.5-Coder-7B with the [Mujassam V5 adapter](https://huggingface.co/AlreemDoss/mujassam-qwen7b-qlora), executes and measures the CadQuery, and returns STEP, STL and GLB. If the backend can't be reached, plates fall back to the browser template.
+
+To point Studio at another backend (for example a local `python app.py` of the Space), open the site with `?backend=http://127.0.0.1:7860`.
 
 ## Landing page sections
 
@@ -77,5 +79,5 @@ The Studio demo has built-in templates for plates, bearing mounts, sensor bracke
 - [ ] Fill in the 5 placeholder families in the Library.
 - [ ] Fill in the team cards on the About page.
 - [ ] Fill in the Results page once the new-dataset runs are done.
-- [ ] Connect Studio to the real backend (QLoRA fallback, STEP export).
+- [x] Connect Studio to the real backend (QLoRA fallback, STEP export).
 - [ ] Replace the procedural gallery models with the pipeline's GLB outputs.
