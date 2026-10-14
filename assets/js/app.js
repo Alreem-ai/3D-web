@@ -8,8 +8,8 @@
   /* ---------- Non-3D UI ---------- */
   document.querySelectorAll('.bar .fill').forEach(f => { f.style.width = f.dataset.w + '%'; });
 
-  /* ---------- Router: one page per hash (#studio, #how, …) ---------- */
-  const ROUTES = ['home', 'studio', 'how', 'library', 'results', 'about', 'guide'];
+  /* ---------- Router: one page per hash (#studio, #library, …) ---------- */
+  const ROUTES = ['home', 'studio', 'library', 'results', 'about', 'guide'];
   const routeEls = [...document.querySelectorAll('.pg')];
   const navLinks = [...document.querySelectorAll('[data-nav]')];
   const menuBtn = document.getElementById('menuBtn'), navEl = document.getElementById('navlinks');
@@ -39,61 +39,6 @@
     location.hash = 'studio';
     setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 60);
   }
-
-  /* ---------- How it works: architecture diagram ---------- */
-  const ARCH = {
-    prompt: ['Prompt', 'A plain-language request with its sizes in millimetres, like “Split shaft collar, 16 mm bore, 32 mm OD, 12 mm wide”.'],
-    spec: ['Spec parser', 'Pulls out the part type, every dimension in mm and each feature (hole Ø, count, position) into a structured spec. Studio shows it to you, so a misread is caught before anything is built.'],
-    rag: ['Recipe RAG', 'Compares the spec with the 8 engineering families and retrieves the closest recipe, together with its similarity score.'],
-    router: ['Router', 'A confident family match goes to the deterministic compiler. Anything else goes to the corrected QLoRA fallback.'],
-    compiler: ['Deterministic compiler', 'Fills the family recipe with your numbers and writes the CadQuery code directly, so known parts come out at exact size.'],
-    qlora: ['Corrected QLoRA', 'A fine-tuned model writes CadQuery for parts outside the 8 families. If the code fails, it gets up to 3 repair loops.'],
-    valid: ['Validation chain', 'Four checks in order: AST safety, isolated execution, watertight mesh and the envelope check against your millimetres. A part has to pass all four.'],
-    export: ['Export', 'The validated part is exported as STEP for CAD tools, STL for 3D printers and GLB for the web.'],
-  };
-  const archDetail = document.getElementById('archDetail');
-  const archNodes = [...document.querySelectorAll('#arch .node')];
-  function showArch(k) {
-    archNodes.forEach(n => n.setAttribute('aria-expanded', n.dataset.n === k));
-    archDetail.innerHTML = '';
-    const h = document.createElement('h3'); h.textContent = ARCH[k][0];
-    const p = document.createElement('p'); p.textContent = ARCH[k][1];
-    archDetail.append(h, p);
-  }
-  archNodes.forEach(n => n.addEventListener('click', () => showArch(n.dataset.n)));
-  showArch('rag');
-
-  /* ---------- How it works: stretch vs build-in-mm demo ---------- */
-  const svg = document.getElementById('scaleSvg'), range = document.getElementById('scaleRange'), scaleNote = document.getElementById('scaleNote');
-  let scaleMode = 'axis';
-  const NS = 'http://www.w3.org/2000/svg';
-  const el = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text) e.textContent = text; return e; };
-  function drawScale() {
-    const t = range.value / 100, px = 4, cx = 180, cy = 118;
-    const w = lerp(40, 60 * px, t), h = lerp(40, 40 * px, t);
-    let rx, ry;
-    if (scaleMode === 'axis') { rx = .15 * w; ry = .15 * h; } else { rx = ry = lerp(6, 3 * px, t); }
-    svg.innerHTML = '';
-    svg.append(
-      el('rect', { x: cx - 120, y: cy - 80, width: 240, height: 160, fill: 'none', stroke: 'rgba(94,214,255,.45)', 'stroke-dasharray': '5 5' }),
-      el('text', { x: cx + 120, y: cy - 86, 'text-anchor': 'end', fill: '#8fa5c2', 'font-size': 11, 'font-family': 'IBM Plex Mono, monospace' }, 'target 60 × 40 mm'),
-      el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 4, fill: '#16294a', stroke: '#5ed6ff', 'stroke-width': 1.5 }),
-      el('ellipse', { cx, cy, rx, ry, fill: '#0a1628', stroke: scaleMode === 'axis' && t > .05 ? '#ff8a2a' : '#5ed6ff', 'stroke-width': 2 })
-    );
-    const dw = (rx * 2 / px).toFixed(1), dh = (ry * 2 / px).toFixed(1);
-    svg.append(el('text', { x: cx, y: 238, 'text-anchor': 'middle', fill: scaleMode === 'axis' && dw !== dh ? '#ff8a2a' : '#e8f1fb', 'font-size': 13, 'font-family': 'IBM Plex Mono, monospace' },
-      'hole ' + (dw === dh ? 'Ø' + dw + ' mm · round' : dw + ' × ' + dh + ' mm · oval')));
-    scaleNote.textContent = scaleMode === 'axis'
-      ? 'Stretching X by 60 and Y by 40 also stretches the hole. A bolt won’t fit an oval.'
-      : 'Building the part in real millimetres keeps the hole round at the size you asked for.';
-  }
-  document.querySelectorAll('.segb').forEach(b => b.addEventListener('click', () => {
-    scaleMode = b.dataset.mode;
-    document.querySelectorAll('.segb').forEach(x => x.setAttribute('aria-pressed', x === b));
-    drawScale();
-  }));
-  range.addEventListener('input', drawScale);
-  drawScale();
 
   /* ---------- Prompt guide: live checker ---------- */
   const gPrompt = document.getElementById('gPrompt'), gChecks = [...document.querySelectorAll('#gChecks li')];

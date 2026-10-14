@@ -33,7 +33,6 @@ The site is one `index.html` with hash routes:
 |---|---|
 | `#home` | Landing page: the robot acts out the pipeline as you scroll |
 | `#studio` | The generator: prompt panel, 3D viewport, spec, pipeline tracker, downloads, history |
-| `#how` | Technical deep dive: interactive workflow, the scale problem, recipe RAG, compiler vs QLoRA, validation chain |
 | `#library` | The 8 engineering families with rotating previews and "Open in Studio" |
 | `#results` | Lab notebook (on hold while results are re-run on the new dataset) |
 | `#about` | The team |
@@ -47,7 +46,6 @@ The site is one `index.html` with hash routes:
 - **Try it**: pick a preset and the robot welds it layer by layer.
 - **Studio**: describe a part (or pick an example) and press Generate. The browser demo parses the spec, picks a recipe, builds the part in real millimetres, runs the four validation checks and unlocks downloads. Drag to orbit, scroll to zoom, toggle x-ray and dimensions, and reopen earlier parts from History.
 - **Downloads**: real binary STL, GLB (in metres, per glTF) and the generated CadQuery `.py`, whose last line writes the STEP file when run with CadQuery.
-- **How it works**: click any box in the workflow diagram; drag the slider to compare stretching each axis with building in real mm.
 - **Prompt guide**: type a request and the live checker scores it out of 5, then opens it in Studio.
 
 The Studio demo has built-in templates for plates, bearing mounts, sensor brackets and shaft collars. Other parts are routed to the QLoRA fallback, which runs on the backend.
