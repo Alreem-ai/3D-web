@@ -1212,10 +1212,15 @@
         } else {
           entry.backend = data; entry.code = data.code || '';
           $('stCode').textContent = entry.code || '# The backend returned no code.';
-          setTrack('route', 'ok', 'QLoRA · ' + data.rounds + ' attempt' + (data.rounds === 1 ? '' : 's'));
+          const ran = data.rounds > 0;
+          setTrack('route', ran ? 'ok' : 'fail', ran ? 'QLoRA · ' + data.rounds + ' attempt' + (data.rounds === 1 ? '' : 's') : 'QLoRA · not run');
           if (data.refused || !data.attempts || !data.attempts.length) {
-            setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked'); entry.reasonShort = data.refused ? 'refused' : 'spec';
-            return finish(data.headline || 'The backend could not build this request.', false);
+            setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked');
+            const quota = /ZeroGPU quota|GPU duration/i.test(data.headline || '');
+            entry.reasonShort = data.refused ? 'refused' : quota ? 'GPU quota' : 'not built';
+            return finish(quota
+              ? 'The free GPU time for today has run out for your connection, so the model couldn’t run. Try again later, or build a bearing mount, sensor bracket or shaft collar here.'
+              : (data.headline || 'The backend could not build this request.'), false);
           }
           const last = data.attempts[data.attempts.length - 1];
           if (data.ok && data.glb_b64) {
@@ -1227,7 +1232,12 @@
             const why = (last.failures || []).slice(0, 2).join(' ');
             return finish((data.headline || 'The model’s part did not pass the checks.') + (why ? ' ' + why : ''), false);
           }
-          spec.label = spec.label || 'QLoRA part';
+          // Describe the backend's part by the request and its measured box, not the browser's quick parse.
+          const t = spec.text || 'QLoRA part';
+          spec.label = t.length > 42 ? t.slice(0, 40) + '…' : t;
+          spec.features = []; spec.assumed = [];
+          if (Array.isArray(data.bbox_mm) && data.bbox_mm.length === 3) spec.envelope = [data.bbox_mm[0], data.bbox_mm[2], data.bbox_mm[1]];
+          showSpec(spec);
           showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = ('QLoRA · ' + spec.label).toUpperCase();
           setTrack('valid', 'ok', 'passed on the backend'); setTrack('export', 'ok', 'STEP · STL · GLB ready'); setDownloads(true);
           const m = entry.meas;
