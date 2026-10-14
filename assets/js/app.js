@@ -8,8 +8,8 @@
   /* ---------- Non-3D UI ---------- */
   document.querySelectorAll('.bar .fill').forEach(f => { f.style.width = f.dataset.w + '%'; });
 
-  /* ---------- Router: one page per hash (#studio, #how, …) ---------- */
-  const ROUTES = ['home', 'studio', 'how', 'library', 'results', 'about', 'guide'];
+  /* ---------- Router: one page per hash (#studio, #library, …) ---------- */
+  const ROUTES = ['home', 'studio', 'library', 'about', 'guide'];
   const routeEls = [...document.querySelectorAll('.pg')];
   const navLinks = [...document.querySelectorAll('[data-nav]')];
   const menuBtn = document.getElementById('menuBtn'), navEl = document.getElementById('navlinks');
@@ -39,61 +39,6 @@
     location.hash = 'studio';
     setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 60);
   }
-
-  /* ---------- How it works: architecture diagram ---------- */
-  const ARCH = {
-    prompt: ['Prompt', 'A plain-language request with its sizes in millimetres, like “Split shaft collar, overall 32 x 32 x 12 mm, 12 mm bore”.'],
-    spec: ['Spec parser', 'Pulls out the part type, every dimension in mm and each feature (hole Ø, count, position) into a structured spec. Studio shows it to you, so a misread is caught before anything is built.'],
-    rag: ['Recipe RAG', 'Compares the spec with the 8 engineering families and retrieves the closest recipe, together with its similarity score.'],
-    router: ['Router', 'A confident family match goes to the deterministic compiler. Anything else goes to the corrected QLoRA fallback.'],
-    compiler: ['Deterministic compiler', 'Fills the family recipe with your numbers and writes the CadQuery code directly, so known parts come out at exact size.'],
-    qlora: ['Corrected QLoRA', 'A fine-tuned model writes CadQuery for parts outside the 8 families. If the code fails, it gets up to 3 repair loops.'],
-    valid: ['Validation chain', 'Four checks in order: AST safety, isolated execution, watertight mesh and the envelope check against your millimetres. A part has to pass all four.'],
-    export: ['Export', 'The validated part is exported as STEP for CAD tools, STL for 3D printers and GLB for the web.'],
-  };
-  const archDetail = document.getElementById('archDetail');
-  const archNodes = [...document.querySelectorAll('#arch .node')];
-  function showArch(k) {
-    archNodes.forEach(n => n.setAttribute('aria-expanded', n.dataset.n === k));
-    archDetail.innerHTML = '';
-    const h = document.createElement('h3'); h.textContent = ARCH[k][0];
-    const p = document.createElement('p'); p.textContent = ARCH[k][1];
-    archDetail.append(h, p);
-  }
-  archNodes.forEach(n => n.addEventListener('click', () => showArch(n.dataset.n)));
-  showArch('rag');
-
-  /* ---------- How it works: stretch vs build-in-mm demo ---------- */
-  const svg = document.getElementById('scaleSvg'), range = document.getElementById('scaleRange'), scaleNote = document.getElementById('scaleNote');
-  let scaleMode = 'axis';
-  const NS = 'http://www.w3.org/2000/svg';
-  const el = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text) e.textContent = text; return e; };
-  function drawScale() {
-    const t = range.value / 100, px = 4, cx = 180, cy = 118;
-    const w = lerp(40, 60 * px, t), h = lerp(40, 40 * px, t);
-    let rx, ry;
-    if (scaleMode === 'axis') { rx = .15 * w; ry = .15 * h; } else { rx = ry = lerp(6, 3 * px, t); }
-    svg.innerHTML = '';
-    svg.append(
-      el('rect', { x: cx - 120, y: cy - 80, width: 240, height: 160, fill: 'none', stroke: 'rgba(94,214,255,.45)', 'stroke-dasharray': '5 5' }),
-      el('text', { x: cx + 120, y: cy - 86, 'text-anchor': 'end', fill: '#8fa5c2', 'font-size': 11, 'font-family': 'IBM Plex Mono, monospace' }, 'target 60 × 40 mm'),
-      el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 4, fill: '#16294a', stroke: '#5ed6ff', 'stroke-width': 1.5 }),
-      el('ellipse', { cx, cy, rx, ry, fill: '#0a1628', stroke: scaleMode === 'axis' && t > .05 ? '#ff8a2a' : '#5ed6ff', 'stroke-width': 2 })
-    );
-    const dw = (rx * 2 / px).toFixed(1), dh = (ry * 2 / px).toFixed(1);
-    svg.append(el('text', { x: cx, y: 238, 'text-anchor': 'middle', fill: scaleMode === 'axis' && dw !== dh ? '#ff8a2a' : '#e8f1fb', 'font-size': 13, 'font-family': 'IBM Plex Mono, monospace' },
-      'hole ' + (dw === dh ? 'Ø' + dw + ' mm · round' : dw + ' × ' + dh + ' mm · oval')));
-    scaleNote.textContent = scaleMode === 'axis'
-      ? 'Stretching X by 60 and Y by 40 also stretches the hole. A bolt won’t fit an oval.'
-      : 'Building the part in real millimetres keeps the hole round at the size you asked for.';
-  }
-  document.querySelectorAll('.segb').forEach(b => b.addEventListener('click', () => {
-    scaleMode = b.dataset.mode;
-    document.querySelectorAll('.segb').forEach(x => x.setAttribute('aria-pressed', x === b));
-    drawScale();
-  }));
-  range.addEventListener('input', drawScale);
-  drawScale();
 
   /* ---------- Prompt guide: live checker ---------- */
   const gPrompt = document.getElementById('gPrompt'), gChecks = [...document.querySelectorAll('#gChecks li')];
@@ -632,7 +577,7 @@
     speck.rotation.x = -Math.PI / 2; speck.position.set(.95, .01, .3); sc.add(speck);
     const plateDims = partDims(DIMS.plate, MM); plateDims.position.copy(plate.position); sc.add(plateDims);
 
-    // Recipe shelf with 8 blueprint cards
+    // Recipe shelf with 16 blueprint cards
     const shelf = new T.Group(); shelf.position.set(1.3, .95, -1.25); sc.add(shelf);
     const back = new T.Mesh(new T.PlaneGeometry(2.7, 1.75), basic('#0c1c36', { transparent: true })); shelf.add(back);
     const backEdge = new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(2.7, 1.75)), new T.LineBasicMaterial({ color: col(C.cyan), transparent: true })); shelf.add(backEdge);
@@ -656,10 +601,10 @@
       else { x.fillText('FAMILY ' + String(i + 1).padStart(2, '0'), 128, 262); }
       const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; return t;
     }
-    const cards = []; const SEL = 5;
-    for (let i = 0; i < 8; i++) {
-      const m = new T.Mesh(new T.PlaneGeometry(.52, .65), new T.MeshBasicMaterial({ map: cardTex(i, i === SEL), transparent: true, toneMapped: false }));
-      m.position.set(-.96 + (i % 4) * .64, i < 4 ? .4 : -.38, .02); shelf.add(m); cards.push(m);
+    const cards = []; const SEL = 7; // family 08, split shaft collar
+    for (let i = 0; i < 16; i++) {
+      const m = new T.Mesh(new T.PlaneGeometry(.3, .375), new T.MeshBasicMaterial({ map: cardTex(i, i === SEL), transparent: true, toneMapped: false }));
+      m.position.set(-1.155 + (i % 8) * .33, i < 8 ? .36 : -.2, .02); shelf.add(m); cards.push(m);
     }
     const cardHome = cards[SEL].position.clone();
     const score = label('similarity 0.71', { border: C.orange, h: .2 }); shelf.add(score);
@@ -752,7 +697,7 @@
         tabText = REQ; tabHL = true; look = LOOK.tablet; L = CAL_L; v.big = '16·32·12'; v.text = '3 mm values found';
       } else if (idx === 3) {
         G.shelf = smooth(0, .25, local); G.pull = smooth(.3, .65, local); Ra = [-2.5, .35, -.25, 0]; look = LOOK.card;
-        tabText = REQ; v.text = G.pull > .5 ? 'RECIPE MATCH' : 'SEARCHING 8 FAMILIES'; if (G.pull > .5) { v.big = '0.71'; v.bigColor = C.orange; }
+        tabText = REQ; v.text = G.pull > .5 ? 'RECIPE MATCH' : 'SEARCHING 16 FAMILIES'; if (G.pull > .5) { v.big = '0.71'; v.bigColor = C.orange; }
       } else if (idx === 4) {
         G.fork = 1; const ride = smooth(.12, .6, local); tokenX = lerp(-.7, .72, ride); G.token = local < .6 ? 1 : 0;
         G.collar = smooth(.6, .8, local); Ra = [-1.35, .55, -.1, 0]; look = LOOK.arch; tabText = REQ;
@@ -1075,9 +1020,6 @@
     SR.resize();
 
     /* pipeline UI */
-    const trackEls = {}; document.querySelectorAll('#stTracker li').forEach(li => { trackEls[li.dataset.k] = li; });
-    function setTrack(k, cls, text) { const li = trackEls[k]; li.className = cls || ''; li.querySelector('span').textContent = text; li.title = text; }
-    const snapTrack = () => Object.keys(trackEls).map(k => [k, trackEls[k].className, trackEls[k].querySelector('span').textContent]);
     const bubble = $('stBubble');
     function say(text, fail) { bubble.textContent = text; bubble.classList.toggle('fail', !!fail); }
     const dlBtns = [...document.querySelectorAll('[data-dl]')], dlNote = $('stDlNote');
@@ -1159,7 +1101,6 @@
     }
     function restore(h) {
       active = h; $('stPrompt').value = h.spec.text;
-      h.track.forEach(([k, cls, txt]) => setTrack(k, cls, txt));
       showSpec(h.spec);
       $('stCode').textContent = h.code || '# No code: the request stopped before code generation.';
       showPart(h.geos, h.meas || [60, 10, 40], true);
@@ -1174,46 +1115,38 @@
     async function run(prompt) {
       if (running) return; running = true;
       const go = $('stGo'); go.disabled = true;
-      Object.keys(trackEls).forEach(k => setTrack(k, '', 'waiting'));
       setDownloads(false);
       $('stCode').textContent = '# Writing…'; setBot('think'); say('Reading your request…');
       const entry = { spec: null, geos: null, meas: null, pass: false, code: '' };
       const finish = (msg, pass) => {
-        entry.message = msg; entry.pass = pass; entry.track = snapTrack();
+        entry.message = msg; entry.pass = pass;
         history.push(entry); active = entry; renderHistory();
         setBot(pass ? 'pass' : 'fail'); say(msg, !pass); running = false; go.disabled = false;
       };
 
-      setTrack('spec', 'run', 'reading…'); await wait(650);
+      await wait(650);
       const spec = parseSpec(prompt); entry.spec = spec; showSpec(spec);
       // Only an empty request or one without mm sizes stops here; anything else goes to the model,
       // which reads the spec itself (the browser's per-family parser is just a preview).
       if (spec.fail && !spec.family) {
-        setTrack('spec', 'fail', 'couldn’t read'); entry.reasonShort = 'spec'; $('stCode').textContent = '# No code: the request needs sizes in mm.';
+        entry.reasonShort = 'spec'; $('stCode').textContent = '# No code: the request needs sizes in mm.';
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         return finish(spec.fail.reason, false);
       }
-      setTrack('spec', 'ok', spec.family ? FAMS[spec.family].name.toLowerCase() : 'free-form part');
       // Every part is written by the fine-tuned QLoRA model on the backend: no browser compiler, no template fallback.
-      setTrack('recipe', 'ok', 'recipe RAG on the backend');
-      setTrack('route', 'run', 'QLoRA model on the backend…');
       say('The fine-tuned model is writing your part on the backend. This takes about a minute (longer if the GPU is waking up)…');
       $('stCode').textContent = '# The QLoRA model is writing CadQuery on the backend…';
       showPart(null); $('stViewLabel').textContent = 'QLORA · WRITING CADQUERY';
       let data = null, err = null;
       try { data = await callBackend(prompt); } catch (e) { err = e; }
       if (!data || data.ok === undefined) {
-        setTrack('route', 'fail', 'backend unreachable'); setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked');
         entry.reasonShort = 'backend offline'; $('stCode').textContent = '# The model backend did not answer.';
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         return finish('I couldn’t reach the model: ' + (err ? err.message : 'no data') + '. Try again in a minute.', false);
       }
       entry.backend = data; entry.code = data.code || '';
       $('stCode').textContent = entry.code || '# The backend returned no code.';
-      const ran = data.rounds > 0;
-      setTrack('route', ran ? 'ok' : 'fail', ran ? 'QLoRA · ' + data.rounds + ' attempt' + (data.rounds === 1 ? '' : 's') : 'QLoRA · not run');
       if (data.refused || !data.attempts || !data.attempts.length) {
-        setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked');
         const quota = /ZeroGPU|GPU quota|runs limit|GPU duration/i.test(data.headline || '');
         entry.reasonShort = data.refused ? 'refused' : quota ? 'GPU quota' : 'not built';
         return finish(quota
@@ -1225,7 +1158,7 @@
         try { entry.geos = await glbToGeos(data.glb_b64); entry.meas = measure(entry.geos); } catch (e) { entry.geos = null; }
       }
       if (!data.ok || !entry.geos) {
-        setTrack('valid', 'fail', (last.stage || 'check') + ' gate'); setTrack('export', 'fail', 'locked'); entry.reasonShort = last.stage || 'fail';
+        entry.reasonShort = last.stage || 'fail';
         showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
         const why = (last.failures || []).slice(0, 2).join(' ');
         return finish((data.headline || 'The model’s part did not pass the checks.') + (why ? ' ' + why : ''), false);
@@ -1237,7 +1170,7 @@
       if (Array.isArray(data.bbox_mm) && data.bbox_mm.length === 3) spec.envelope = [data.bbox_mm[0], data.bbox_mm[2], data.bbox_mm[1]];
       showSpec(spec);
       showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = ('QLoRA · ' + spec.label).toUpperCase();
-      setTrack('valid', 'ok', 'passed on the backend'); setTrack('export', 'ok', 'STEP · STL · GLB ready'); setDownloads(true);
+      setDownloads(true);
       const m = entry.meas;
       return finish(data.headline + ' Measured ' + m[0].toFixed(2) + ' × ' + m[2].toFixed(2) + ' × ' + m[1].toFixed(2) + ' mm. Your files are ready.', true);
     }
@@ -1300,32 +1233,146 @@
     }));
     routeHooks.push(r => { if (r === 'studio') { S.resize(); SR.resize(); } });
   }
-  /* ===== Library: 8 family cards, one shared WebGL canvas drawn into each card ===== */
+  /* ===== Library: the 16 recipe families, one shared WebGL canvas drawn into each card ===== */
+  // Extra shapes for the library previews (mm, base on y=0, centred in x/z)
+  const rectShape = (x0, y0, x1, y1, P = T.Shape) => { const s = new P(); s.moveTo(x0, y0); s.lineTo(x1, y0); s.lineTo(x1, y1); s.lineTo(x0, y1); s.closePath(); return s; };
+  const slotPath = (cx, cy, len, w) => {
+    const p = new T.Path(), r = w / 2, h = len / 2 - r;
+    p.moveTo(cx - h, cy - r); p.lineTo(cx + h, cy - r); p.absarc(cx + h, cy, r, -Math.PI / 2, Math.PI / 2, false);
+    p.lineTo(cx - h, cy + r); p.absarc(cx - h, cy, r, Math.PI / 2, Math.PI * 1.5, false); return p;
+  };
+  const disc = (od, holes = []) => { const s = new T.Shape(); s.absarc(0, 0, od / 2, 0, Math.PI * 2, false); holes.forEach(h => s.holes.push(h)); return s; };
+  // a shape drawn upright (x across, y up), extruded d along z from z0
+  const extXY = (s, d, z0 = -d / 2) => { const g = new T.ExtrudeGeometry(s, { depth: d, bevelEnabled: false, curveSegments: CURVE }); g.translate(0, 0, z0); return g; };
+  const square4 = (a, b = a) => [[-a / 2, -b / 2], [a / 2, -b / 2], [a / 2, b / 2], [-a / 2, b / 2]];
+  const LIB_GEOS = {
+    chamferPlate: ({ W, D, T: t, c, bore }) => {
+      const s = new T.Shape(), x = W / 2, y = D / 2;
+      s.moveTo(-x + c, -y); s.lineTo(x - c, -y); s.lineTo(x, -y + c); s.lineTo(x, y - c); s.lineTo(x - c, y); s.lineTo(-x + c, y); s.lineTo(-x, y - c); s.lineTo(-x, -y + c); s.closePath();
+      s.holes.push(circ(0, 0, bore / 2)); return [ext(s, t)];
+    },
+    cableClip: ({ L, W, H, ch, floor }) => {
+      const s = new T.Shape();
+      s.moveTo(-W / 2, 0); s.lineTo(W / 2, 0); s.lineTo(W / 2, H); s.lineTo(ch / 2, H); s.lineTo(ch / 2, floor);
+      s.lineTo(-ch / 2, floor); s.lineTo(-ch / 2, H); s.lineTo(-W / 2, H); s.closePath();
+      const g = extXY(s, L); g.rotateY(Math.PI / 2); return [g];
+    },
+    roundPad: ({ OD, T: t, bore }) => [ext(disc(OD, [circ(0, 0, bore / 2)]), t)],
+    setScrewCollar: ({ OD, ID, H, ss }) => {
+      const h1 = (H - ss) / 2, ring = disc(OD, [circ(0, 0, ID / 2)]);
+      const lo = ext(ring, h1), hi = ext(ring, h1); hi.translate(0, h1 + ss, 0);
+      const band = buildGeos('collar', { OD, bore: ID, width: ss, slot: ss })[0]; band.translate(0, h1, 0); // radial set-screw hole
+      return [lo, band, hi];
+    },
+    hollowArm: ({ L, W, H, t }) => {
+      const s = rectShape(-W / 2, 0, W / 2, H); s.holes.push(rectShape(-W / 2 + t, t, W / 2 - t, H - t, T.Path));
+      const g = extXY(s, L); g.rotateY(Math.PI / 2); return [g];
+    },
+    standoffPlate: ({ W, D, H, base, post, bore, pat }) => {
+      const pts = square4(pat), s = rrShape(W, D, 2);
+      pts.forEach(([x, y]) => s.holes.push(circ(x, y, bore / 2)));
+      const out = [ext(s, base)];
+      pts.forEach(([x, y]) => { const g = ext(disc(post, [circ(0, 0, bore / 2)]), H - base); g.translate(x, base, -y); out.push(g); });
+      return out;
+    },
+    motorBracket: ({ W, D, H, t, bore, fh, slotL, slotW }) => {
+      const b = rectShape(-W / 2, -D / 2, W / 2, D / 2);
+      [-1, 1].forEach(k => b.holes.push(slotPath(k * W / 4, -D / 6, slotL, slotW)));
+      const cy = t + (H - t) / 2, w = rectShape(-W / 2, 0, W / 2, H);
+      w.holes.push(circ(0, cy, bore / 2)); [-1, 1].forEach(k => w.holes.push(circ(k * (bore / 2 + fh * 1.6), cy, fh / 2)));
+      return [ext(b, t), extXY(w, t, -D / 2)];
+    },
+    bearingHousing: ({ W, D, H, cb, cbd, thru, mh, pat }) => {
+      const pts = square4(pat), lower = rrShape(W, D, 1.5), upper = rrShape(W, D, 1.5);
+      lower.holes.push(circ(0, 0, thru / 2)); upper.holes.push(circ(0, 0, cb / 2));
+      pts.forEach(([x, y]) => { lower.holes.push(circ(x, y, mh / 2)); upper.holes.push(circ(x, y, mh / 2)); });
+      const top = ext(upper, cbd); top.translate(0, H - cbd, 0);
+      return [ext(lower, H - cbd), top];
+    },
+    sensorShell: ({ W, D, H, t, lens, slotL, slotW }) => {
+      const hw = H - t, top = ext(rrShape(W, D, 1), t); top.translate(0, hw, 0);
+      const front = rectShape(-W / 2, 0, W / 2, hw); front.holes.push(circ(0, hw / 2, lens / 2));
+      const back = rectShape(-W / 2, 0, W / 2, hw); back.holes.push(slotPath(0, hw * .35, slotL, slotW));
+      const out = [top, extXY(front, t, D / 2 - t), extXY(back, t, -D / 2)];
+      [-1, 1].forEach(k => { const g = new T.BoxGeometry(t, hw, D - 2 * t); g.translate(k * (W / 2 - t / 2), hw / 2, 0); out.push(g); });
+      return out;
+    },
+    wheelHub: ({ OD, H, bore, n, bh, pcd }) => {
+      const holes = [circ(0, 0, bore / 2)];
+      for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n; holes.push(circ(pcd / 2 * Math.cos(a), pcd / 2 * Math.sin(a), bh / 2)); }
+      return [ext(disc(OD, holes), H)];
+    },
+    tensioner: ({ L, W, T: t, pivot, slotL, slotW }) => {
+      const s = rrShape(L, W, 3);
+      s.holes.push(circ(-L / 2 + 7, 0, pivot / 2), slotPath(L / 2 - 5 - slotL / 2, 0, slotL, slotW));
+      return [ext(s, t)];
+    },
+    taperedLeg: ({ top, foot, H }) => { const g = new T.CylinderGeometry(top / Math.SQRT2, foot / Math.SQRT2, H, 4, 1); g.rotateY(Math.PI / 4); g.translate(0, H / 2, 0); return [g]; },
+  };
   const LIB = [
-    { k: 'bearing', name: 'Flanged bearing mount', desc: 'A square flange with four bolt holes and a raised boss that holds a bearing.', dims: '48 × 48 × 18 mm',
-      prompts: ['Flanged bearing mount, overall 48 x 48 x 18 mm, 16 mm central bore, four 5.5 mm mounting holes on a 36 mm square pattern.', 'Flanged bearing mount, overall 60 x 60 x 20 mm, 20 mm central bore, four 6.5 mm mounting holes on a 46 mm square pattern.'] },
-    { k: 'bracket', name: 'U-shaped sensor bracket', desc: 'Two side walls on a base, with a matching hole in each wall to hold a sensor.', dims: '50 × 30 × 35 mm',
-      prompts: ['U-shaped sensor bracket, overall 50 x 30 x 35 mm, 3 mm walls, two 4 mm base holes and one 6 mm pivot hole through both side walls.', 'U-shaped sensor bracket, overall 40 x 25 x 30 mm, 3 mm walls, two 4 mm base holes and one 8 mm sensor hole through both side walls.'] },
-    { k: 'collar', name: 'Split shaft collar', desc: 'A ring that clamps onto a shaft. The split slot lets it tighten.', dims: '≈ 32 × 32 × 12 mm',
-      prompts: ['Split shaft collar, overall 32 x 32 x 12 mm, 12 mm bore, 4 mm radial clamp bolt hole and a 2 mm split slot.', 'Split shaft collar, overall 24 x 24 x 9 mm, 10 mm bore, 3 mm radial clamp bolt hole and a 2 mm split slot.'] },
-    null, null, null, null, null,
+    { name: 'Chamfered plate with central bore', desc: 'A flat plate with chamfered corners and one through-bore in the middle.', dims: '72 × 64 × 5 mm',
+      geos: () => LIB_GEOS.chamferPlate({ W: 72, D: 64, T: 5, c: 2.5, bore: 21 }),
+      prompts: ['plate 72x64x5 mm, 2.5 mm chamfered corners, centre bore 21 mm', 'Rectangular base, envelope 52 x 56 x 6 mm; corner chamfer 2 mm; centre hole diameter 13 mm.'] },
+    { name: 'Cable clip / open channel clip', desc: 'A low block with an open channel that holds a cable, and a screw hole to fix it down.', dims: '22 × 17 × 9.5 mm',
+      geos: () => LIB_GEOS.cableClip({ L: 22, W: 17, H: 9.5, ch: 8, floor: 3 }),
+      prompts: ['cable clip 22x17x9.5 mm, channel 8 mm, floor 3 mm, one 4 mm hole near one end', 'Cable retaining clip, envelope 26x11x8 mm; channel 5.5 mm wide; floor 2 mm; two 4 mm holes near the ends.'] },
+    { name: 'Rectangular plate with repeated mounting holes', desc: 'A flat plate with a repeated pattern of mounting holes, usually one near each corner.', dims: '62 × 38 × 3 mm',
+      geos: () => { const p = { W: 62, D: 38, T: 3, n: 4, d: 3, inset: 7.5 }; p.holes = holeLayout(p); return buildGeos('plate', p); },
+      prompts: ['plate 62x38x3 mm, 4 corner holes 3 mm, centred 7.5 mm from the sides', 'Rectangular mounting plate, 34x54x4 mm, four 4.5 mm holes on a 25 x 45 mm rectangle.'] },
+    { name: 'Circular flange or landing pad with central bore', desc: 'A round disc, washer or landing pad with a through-bore in the centre.', dims: 'Ø64 × 5 mm',
+      geos: () => LIB_GEOS.roundPad({ OD: 64, T: 5, bore: 19 }),
+      prompts: ['disc OD 64, thk 5, bore 19 mm', 'Thick washer, 66 mm OD x 7 mm, 8 mm bore.'] },
+    { name: 'Shaft collar with axial bore and radial set-screw hole', desc: 'A solid ring that slides onto a shaft and locks with a set screw through a radial hole.', dims: 'Ø36 × 10 mm',
+      geos: () => LIB_GEOS.setScrewCollar({ OD: 36, ID: 8, H: 10, ss: 5 }),
+      prompts: ['collar OD 36 mm, ID 8 mm, height 10 mm, radial set screw hole 5 mm at mid height', 'Shaft collar, envelope 43x43x11 mm; centre hole 15 mm; side set-screw hole 3 mm.'] },
+    { name: 'Flange bearing mount', desc: 'A square flange with four bolt holes and a raised round boss that holds a bearing.', dims: '60 × 60 × 22 mm',
+      geos: () => buildGeos('bearing', { W: 60, D: 60, H: 22, tf: 7, bossR: 18.5, bore: 14, bolt: 5, inset: 10 }),
+      prompts: ['bearing flange 60x60x22 mm with round boss, bore 14 mm, 4 bolt holes 5 mm on 40 mm square', 'flange mount, 56 mm square x 20 mm tall, 37 mm boss, 24 mm bore, four 4 mm holes on a 35 mm square'] },
+    { name: 'U-shaped bracket', desc: 'A base with two side walls. A pivot hole runs through both walls, and the base has mounting holes.', dims: '56 × 26 × 38 mm',
+      geos: () => buildGeos('bracket', { W: 56, D: 26, H: 38, t: 3, sensorD: 5, sensorY: 24, baseD: 5, baseX: 14 }),
+      prompts: ['u bracket 56x26x38 mm, 3 mm thick, 2 base holes 5 mm, pivot hole 5 mm through both walls', 'Fork bracket, envelope 62 x 28 x 36 mm; wall 2.5 mm; two base holes of 3.2 mm; side-wall pivot hole 7 mm.'] },
+    { name: 'Split shaft collar', desc: 'A ring that clamps onto a shaft. A split slot and a clamp bolt let it tighten.', dims: 'Ø33 × 11 mm',
+      geos: () => buildGeos('collar', { OD: 33, bore: 10, width: 11, slot: 2.5 }),
+      prompts: ['split collar OD 33 mm, bore 10 mm, height 11 mm, slit 2.5 mm, clamp bolt hole 3 mm', 'clamp collar dia 36, bore 8, height 12, split 3, bolt hole 3 (mm)'] },
+    { name: 'Hollow rectangular arm', desc: 'A long box-section tube with thin walls and a mounting hole near each end.', dims: '110 × 20 × 14 mm',
+      geos: () => LIB_GEOS.hollowArm({ L: 110, W: 20, H: 14, t: 2 }),
+      prompts: ['Hollow rectangular arm, overall 110 by 20 by 14 mm, 2 mm walls and one 3.5 mm side-to-side hole near each end.', '125 mm hollow rectangular arm, 19 mm wide, 12 mm high, walls 2.5 mm, one 3 mm vertical mounting hole near each end.'] },
+    { name: 'Standoff mounting plate', desc: 'A base plate with four raised posts, each with a bore, for mounting a circuit board or controller.', dims: '47 × 40 × 10 mm',
+      geos: () => LIB_GEOS.standoffPlate({ W: 47, D: 40, H: 10, base: 4, post: 6, bore: 3, pat: 30 }),
+      prompts: ['standoff plate 47x40x10 mm, base 4 mm, 4 posts 6 mm OD, bore 3 mm, on a 30 mm square pattern', 'Electronics mount, envelope 52 x 55 x 7.5 mm; base 3.5 mm; four posts 6.5 mm with 3 mm through bores on a 30 mm square pattern.'] },
+    { name: 'Right-angle motor bracket', desc: 'An L-shaped bracket. The upright holds a motor through a large bore; the base has slots for adjustment.', dims: '48 × 48 × 44 mm',
+      geos: () => LIB_GEOS.motorBracket({ W: 48, D: 48, H: 44, t: 3, bore: 17, fh: 4, slotL: 13, slotW: 3 }),
+      prompts: ['motor bracket, L shape, 48x48x44 mm, 3 mm thick, bore 17 mm, 2 x 4 mm face holes, base slots 13 x 3 mm (two)', 'motor bracket, L shape, 55x36x44 mm, 3 mm thick, bore 22 mm, 2 x 3 mm face holes, base slots 12 x 3 mm (two)'] },
+    { name: 'Bearing housing with counterbore', desc: 'A block with a shallow seat for a bearing, a smaller through-bore and four mounting holes.', dims: '41 × 41 × 13 mm',
+      geos: () => LIB_GEOS.bearingHousing({ W: 41, D: 41, H: 13, cb: 18, cbd: 5, thru: 8, mh: 4, pat: 33 }),
+      prompts: ['bearing block 41x41x13 mm, cbore 18 mm dia 5 mm deep, thru bore 8 mm, 4 mounting holes 4 mm on a 33 mm square', 'bearing block 52x43x14 mm, cbore 23 mm dia 8 mm deep, thru bore 10 mm, 4 mounting holes 5 mm on a 35 mm square'] },
+    { name: 'Open sensor housing shell', desc: 'A thin-walled cover open at the bottom, with a lens hole at the front and a cable slot at the back.', dims: '60 × 34 × 18 mm',
+      geos: () => LIB_GEOS.sensorShell({ W: 60, D: 34, H: 18, t: 2, lens: 10, slotL: 10, slotW: 3.5 }),
+      prompts: ['sensor shell 60x34x18 mm, open bottom, wall 2 mm, front hole 10 mm, rear slot 10x3.5 mm', 'Sensor cover, envelope 49x37x19 mm; wall 2 mm; bottom open; lens bore 11 mm; rear slot 6 by 3.5 mm.'] },
+    { name: 'Wheel hub with bolt circle', desc: 'A round hub with a centre bore and bolt holes spaced evenly on a pitch circle.', dims: 'Ø43 × 12 mm',
+      geos: () => LIB_GEOS.wheelHub({ OD: 43, H: 12, bore: 8, n: 6, bh: 4, pcd: 35 }),
+      prompts: ['43 mm hub, 12 mm thick, 8 mm through bore, 6 x 4 mm bolt holes at 35 mm PCD.', 'wheel hub OD 40 mm, height 10 mm, bore 12 mm, 4 x 3.2 mm holes on 23 mm PCD'] },
+    { name: 'Slotted tensioner bracket', desc: 'A flat plate with a pivot hole at one end and a long slot for adjusting belt tension.', dims: '46 × 23 × 10 mm',
+      geos: () => LIB_GEOS.tensioner({ L: 46, W: 23, T: 10, pivot: 4, slotL: 18, slotW: 4 }),
+      prompts: ['Belt tensioner plate, overall 46x23x10 mm, 4 mm pivot hole and 18 x 4 mm adjustment slot.', 'tensioner plate 47x24x8 mm, pivot hole 6 mm, slot 22x4 mm'] },
+    { name: 'Tapered support leg', desc: 'A square post that tapers from a wide top to a narrow foot, with a hole through its length.', dims: '24 × 24 × 90 mm',
+      geos: () => LIB_GEOS.taperedLeg({ top: 24, foot: 13, H: 90 }),
+      prompts: ['Leg, square and tapered, 24x24x90 mm, foot 13 x 13 mm, centred 3.2 mm through hole.', 'square tapered leg h 60 mm, top 21 mm sq, foot 10 mm sq, 5 mm thru hole'] },
   ];
   function initLibrary() {
     const grid = document.getElementById('libGrid');
     const views = LIB.map((f, i) => {
-      const card = document.createElement('article'); card.className = 'lcard' + (f ? '' : ' placeholder');
+      const card = document.createElement('article'); card.className = 'lcard';
       const view = document.createElement('div'); view.className = 'lview';
       const tag = document.createElement('span'); tag.textContent = 'FAMILY ' + String(i + 1).padStart(2, '0'); view.append(tag);
       const body = document.createElement('div'); body.className = 'lbody';
-      const h = document.createElement('h3'); h.textContent = f ? f.name : 'Family name';
-      const p = document.createElement('p'); p.textContent = f ? f.desc : 'Description to come.';
-      const d = document.createElement('div'); d.className = 'dims'; d.textContent = f ? 'Typical: ' + f.dims : 'Typical size to come';
-      body.append(h, p, d);
-      if (f) { const ul = document.createElement('ul'); f.prompts.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.append(li); }); body.append(ul); }
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (f ? '' : ' ghost') + ' sm';
-      b.textContent = f ? 'Open in Studio' : 'Coming soon'; b.disabled = !f;
-      if (f) b.addEventListener('click', () => openInStudio(f.prompts[0]));
-      body.append(b);
+      const h = document.createElement('h3'); h.textContent = f.name;
+      const p = document.createElement('p'); p.textContent = f.desc;
+      const d = document.createElement('div'); d.className = 'dims'; d.textContent = 'Typical: ' + f.dims;
+      const ul = document.createElement('ul'); f.prompts.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.append(li); });
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm'; b.textContent = 'Open in Studio';
+      b.addEventListener('click', () => openInStudio(f.prompts[0]));
+      body.append(h, p, d, ul, b);
       card.append(view, body); grid.append(card);
       const it = { view, hover: 0, over: false };
       card.addEventListener('pointerenter', () => { it.over = true; }); card.addEventListener('pointerleave', () => { it.over = false; });
@@ -1335,7 +1382,6 @@
     const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
     renderer.outputEncoding = T.sRGBEncoding; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
-    const GM = .036;
     views.forEach((it, i) => {
       const f = LIB[i], scene = new T.Scene(), cam = new T.PerspectiveCamera(30, 1.4, .1, 50);
       scene.add(new T.HemisphereLight(col('#cfe9ff'), col('#0a1628'), .9));
@@ -1344,12 +1390,10 @@
       const spin = new T.Group(); scene.add(spin);
       const disc = new T.Mesh(new T.CylinderGeometry(1.15, 1.2, .07, 64), std('#14284a', .6, .2)); disc.position.y = -.035; scene.add(disc);
       const ring = new T.Mesh(new T.TorusGeometry(1.17, .01, 6, 96), basic(C.cyan, { toneMapped: false })); ring.rotation.x = Math.PI / 2; scene.add(ring);
-      if (f) { const p = makePart(f.k, metal(), .4); p.scale.setScalar(GM); spin.add(p); }
-      else {
-        const box = new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(1.1, .8, 1.1)), new T.LineDashedMaterial({ color: col(C.cyan), dashSize: .06, gapSize: .05, transparent: true, opacity: .6 }));
-        box.computeLineDistances(); box.position.y = .4; spin.add(box);
-        const q = label('?', { h: .42, px: 60 }); q.position.y = .45; spin.add(q);
-      }
+      const geos = f.geos(), box = new T.Box3();
+      geos.forEach(g => { g.computeBoundingBox(); box.union(g.boundingBox); });
+      const sz = box.getSize(new T.Vector3()), k = Math.min(1.9 / Math.max(sz.x, sz.z), 1.25 / sz.y); // fit the turntable and the frame
+      const part = makePart('custom', metal(), .4, {}, geos); part.scale.setScalar(k); spin.add(part);
       cam.position.set(0, 1.45, 4.3); cam.lookAt(0, .35, 0);
       Object.assign(it, { scene, cam, spin, rot: i * .8 });
     });
