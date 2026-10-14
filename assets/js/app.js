@@ -1102,7 +1102,7 @@
 
     /* the real backend: the Mujassam API gateway Space, which runs the QLoRA model Space on the owner's GPU quota */
     const API = (new URLSearchParams(location.search).get('backend') || window.MUJASSAM_API || 'https://alreemdoss-mujassam-api.hf.space').replace(/\/+$/, '');
-    const API_ROUNDS = 2, API_TOLERANCE = 0.8, API_TIMEOUT_MS = 6 * 60 * 1000;
+    const API_ROUNDS = 3, API_TOLERANCE = 0.8, API_TIMEOUT_MS = 6 * 60 * 1000;
     async function callBackend(prompt) {
       const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), API_TIMEOUT_MS);
       try {
