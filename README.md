@@ -45,12 +45,12 @@ The site is one `index.html` with hash routes:
 - **Home**: the robot follows your cursor; scroll to watch it act out each pipeline stage.
 - **Gallery**: drag a part to orbit it, hover for its dimensions, toggle x-ray.
 - **Try it**: pick a preset and the robot welds it layer by layer.
-- **Studio**: describe a part (or pick an example) and press Generate. The browser demo parses the spec, picks a recipe, builds the part in real millimetres, runs the four validation checks and unlocks downloads. Drag to orbit, scroll to zoom, toggle x-ray and dimensions, and reopen earlier parts from History.
+- **Studio**: describe a part (or pick an example) and press Generate. The QLoRA model on the backend writes the CadQuery, runs it, checks it against your millimetres and returns STEP, STL and GLB, which unlock the downloads. Drag to orbit, scroll to zoom, toggle x-ray and dimensions, and reopen earlier parts from History.
 - **Downloads**: real binary STL, GLB (in metres, per glTF) and the generated CadQuery `.py`, whose last line writes the STEP file when run with CadQuery.
 - **How it works**: click any box in the workflow diagram; drag the slider to compare stretching each axis with building in real mm.
 - **Prompt guide**: type a request and the live checker scores it out of 5, then opens it in Studio.
 
-Bearing mounts, sensor brackets and shaft collars are compiled in the browser. Plates and every other part are sent to the QLoRA backend: the [Mujassam Space](https://huggingface.co/spaces/AlreemDoss/mujassam) runs Qwen2.5-Coder-7B with the [Mujassam V5 adapter](https://huggingface.co/AlreemDoss/mujassam-qwen7b-qlora), executes and measures the CadQuery, and returns STEP, STL and GLB. If the backend can't be reached, plates fall back to the browser template.
+Every Studio request is sent to the QLoRA backend (there is no browser compiler or template fallback): the [Mujassam Space](https://huggingface.co/spaces/AlreemDoss/mujassam) runs Qwen2.5-Coder-7B with the [Mujassam V5 adapter](https://huggingface.co/AlreemDoss/mujassam-qwen7b-qlora), executes and measures the CadQuery, and returns STEP, STL and GLB. The site calls it through the [Mujassam API gateway](https://huggingface.co/spaces/AlreemDoss/mujassam-api), which forwards each request with the owner's Hugging Face token so the model runs on the owner's ZeroGPU quota instead of the visitor's anonymous one. If the backend can't be reached, Studio says so instead of building a template.
 
 To point Studio at another backend (for example a local `python app.py` of the Space), open the site with `?backend=http://127.0.0.1:7860`.
 

@@ -261,7 +261,7 @@
       </details>
     </aside>
   </div>
-  <p class="demo-note container">Bearing mounts, sensor brackets and shaft collars are compiled in your browser. Plates and every other part go to the fine-tuned QLoRA model on the backend (a Hugging Face Space), which writes the CadQuery, runs it, checks the size and sends back STEP, STL and GLB. Give the overall size in mm.</p>
+  <p class="demo-note container">Every part is written by the fine-tuned QLoRA model on the backend (a Hugging Face Space), which writes the CadQuery, runs it, checks the size and sends back STEP, STL and GLB. Give the overall size in mm. A part takes about a minute.</p>
 </div>
 
 <!-- ============ HOW IT WORKS ============ -->
@@ -364,7 +364,7 @@
     <div class="page-head">
       <div class="eyebrow">Part library</div>
       <h1>The 8 engineering families.</h1>
-      <p class="body">These families go through the deterministic compiler, so they come out at exact size. Anything else falls back to the QLoRA model. Pick a family and open it in Studio with a prompt ready to go.</p>
+      <p class="body">Pick a family and open it in Studio with a prompt ready to go. The fine-tuned QLoRA model writes the part and the backend checks it against your millimetres.</p>
     </div>
     <div class="lib-grid" id="libGrid"></div>
   </div>
