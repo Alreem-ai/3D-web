@@ -1100,6 +1100,47 @@
     }
     const wait = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 120) : ms));
 
+    /* the real backend: the QLoRA model on the Mujassam Hugging Face Space */
+    const API = (new URLSearchParams(location.search).get('backend') || window.MUJASSAM_API || 'https://alreemdoss-mujassam.hf.space').replace(/\/+$/, '');
+    const API_ROUNDS = 2, API_TOLERANCE = 0.8, API_TIMEOUT_MS = 6 * 60 * 1000;
+    async function callBackend(prompt) {
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), API_TIMEOUT_MS);
+      try {
+        const r = await fetch(API + '/gradio_api/call/generate', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
+          body: JSON.stringify({ data: [prompt, API_ROUNDS, API_TOLERANCE] }),
+        });
+        if (!r.ok) throw new Error('the backend answered ' + r.status);
+        const { event_id: id } = await r.json();
+        const s = await fetch(API + '/gradio_api/call/generate/' + id, { signal: ctl.signal });
+        const text = await s.text();
+        // Server-sent events: the last "complete" or "error" event carries the answer.
+        const events = [...text.matchAll(/event:\s*(\w+)\s*\ndata:\s*(.*)/g)];
+        const done = events.reverse().find(m => m[1] === 'complete' || m[1] === 'error');
+        if (!done) throw new Error('no answer from the backend');
+        let data = null; try { data = JSON.parse(done[2]); } catch (e) { /* plain-text error */ }
+        if (done[1] === 'error') throw new Error((data && (data.message || data.error)) || done[2] || 'the backend reported an error (GPU quota or the Space is starting)');
+        return Array.isArray(data) ? data[0] : data;
+      } catch (e) {
+        if (e.name === 'AbortError') throw new Error('the backend took too long');
+        throw e;
+      } finally { clearTimeout(timer); }
+    }
+    const b64bytes = b64 => { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    // The backend's GLB is CadQuery's own mesh: millimetres, Z up. The viewer is Y up, base on y = 0, centred.
+    async function glbToGeos(b64) {
+      if (!T.GLTFLoader) await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js');
+      const buf = b64bytes(b64).buffer;
+      const gltf = await new Promise((res, rej) => new T.GLTFLoader().parse(buf, '', res, rej));
+      gltf.scene.updateMatrixWorld(true);
+      const geos = [];
+      gltf.scene.traverse(n => { if (n.isMesh) { const g = n.geometry.clone(); g.applyMatrix4(n.matrixWorld); g.rotateX(-Math.PI / 2); geos.push(g); } });
+      if (!geos.length) throw new Error('the GLB has no mesh');
+      const b = new T.Box3(); geos.forEach(g => { g.computeBoundingBox(); b.union(g.boundingBox); });
+      geos.forEach(g => { g.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2); if (!g.attributes.normal) g.computeVertexNormals(); });
+      return geos;
+    }
+
     /* history */
     const history = []; let active = null;
     function renderHistory() {
@@ -1152,13 +1193,46 @@
       }
       setTrack('spec', 'ok', spec.family ? FAMS[spec.family].name.toLowerCase() : 'unknown part');
       setTrack('recipe', 'run', 'searching 8 families…'); say('Looking for the closest recipe…'); await wait(700);
-      if (!spec.family) {
-        setTrack('recipe', 'fail', 'no match · ' + spec.similarity.toFixed(2));
-        setTrack('route', 'run', 'QLoRA fallback…'); await wait(650);
-        setTrack('route', 'fail', 'QLoRA · backend only'); entry.reasonShort = 'not in demo';
-        $('stCode').textContent = '# The QLoRA fallback writes this part on the backend.';
-        showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
-        return finish('That part goes to the QLoRA fallback, which runs on the backend. Here I can build plates, bearing mounts, sensor brackets and shaft collars.', false);
+      if (!spec.family || FAMS[spec.family].route === 'qlora') {
+        setTrack('recipe', spec.family ? 'ok' : 'fail', (spec.family ? 'no confident match · ' : 'no match · ') + spec.similarity.toFixed(2));
+        setTrack('route', 'run', 'QLoRA model on the backend…');
+        say('No compiler recipe for this one, so the fine-tuned model writes it on the backend. The first run can take a minute or two while the GPU wakes up…');
+        $('stCode').textContent = '# The QLoRA model is writing CadQuery on the backend…';
+        showPart(null); $('stViewLabel').textContent = 'QLORA · WRITING CADQUERY';
+        let data = null, err = null;
+        try { data = await callBackend(prompt); } catch (e) { err = e; }
+        if (!data || data.ok === undefined) {
+          setTrack('route', 'fail', 'backend unreachable');
+          if (spec.family) {
+            say('The backend didn’t answer (' + (err ? err.message : 'no data') + '), so I’ll use the browser’s demo template.'); await wait(900);
+          } else {
+            entry.reasonShort = 'backend offline'; $('stCode').textContent = '# The backend did not answer.';
+            return finish('I couldn’t reach the QLoRA backend: ' + (err ? err.message : 'no data') + '. Try again in a minute, or build a plate, bearing mount, sensor bracket or shaft collar here.', false);
+          }
+        } else {
+          entry.backend = data; entry.code = data.code || '';
+          $('stCode').textContent = entry.code || '# The backend returned no code.';
+          setTrack('route', 'ok', 'QLoRA · ' + data.rounds + ' attempt' + (data.rounds === 1 ? '' : 's'));
+          if (data.refused || !data.attempts || !data.attempts.length) {
+            setTrack('valid', 'fail', 'not built'); setTrack('export', 'fail', 'locked'); entry.reasonShort = data.refused ? 'refused' : 'spec';
+            return finish(data.headline || 'The backend could not build this request.', false);
+          }
+          const last = data.attempts[data.attempts.length - 1];
+          if (data.ok && data.glb_b64) {
+            try { entry.geos = await glbToGeos(data.glb_b64); entry.meas = measure(entry.geos); } catch (e) { entry.geos = null; }
+          }
+          if (!data.ok || !entry.geos) {
+            setTrack('valid', 'fail', (last.stage || 'check') + ' gate'); setTrack('export', 'fail', 'locked'); entry.reasonShort = last.stage || 'fail';
+            showPart(null); $('stViewLabel').textContent = 'NO PART · UNITS mm';
+            const why = (last.failures || []).slice(0, 2).join(' ');
+            return finish((data.headline || 'The model’s part did not pass the checks.') + (why ? ' ' + why : ''), false);
+          }
+          spec.label = spec.label || 'QLoRA part';
+          showPart(entry.geos, entry.meas, false); $('stViewLabel').textContent = ('QLoRA · ' + spec.label).toUpperCase();
+          setTrack('valid', 'ok', 'passed on the backend'); setTrack('export', 'ok', 'STEP · STL · GLB ready'); setDownloads(true);
+          const m = entry.meas;
+          return finish(data.headline + ' Measured ' + m[0].toFixed(2) + ' × ' + m[2].toFixed(2) + ' × ' + m[1].toFixed(2) + ' mm. Your files are ready.', true);
+        }
       }
       const fam = FAMS[spec.family];
       setTrack('recipe', 'ok', fam.route === 'compiler' ? fam.name.toLowerCase() + ' · ' + spec.similarity.toFixed(2) : 'no confident match · ' + spec.similarity.toFixed(2));
@@ -1197,7 +1271,7 @@
     document.querySelectorAll('.pchip').forEach(b => b.addEventListener('click', () => { $('stPrompt').value = b.dataset.prompt; run(b.dataset.prompt); }));
 
     /* downloads */
-    function fileBase() { const h = active; return (h && h.spec.family ? FILES[h.spec.family] || h.spec.family : 'part'); }
+    function fileBase() { const h = active; if (h && h.backend) return 'mujassam_part'; return (h && h.spec.family ? FILES[h.spec.family] || h.spec.family : 'part'); }
     function toSTL(geos) {
       let tris = 0; geos.forEach(g => { tris += (g.index ? g.index.count : g.attributes.position.count) / 3; });
       const buf = new ArrayBuffer(84 + tris * 50), dv = new DataView(buf); dv.setUint32(80, tris, true);
@@ -1241,9 +1315,11 @@
       const h = active; if (!h || !h.pass) return;
       const base = fileBase(), kind = b.dataset.dl;
       try {
-        if (kind === 'stl') await saveFile(base + '.stl', toSTL(h.geos));
+        const B = h.backend;
+        if (kind === 'stl') await saveFile(base + '.stl', B && B.stl_b64 ? b64bytes(B.stl_b64) : toSTL(h.geos));
         else if (kind === 'glb') await saveFile(base + '.glb', await toGLB(h.geos));
         else if (kind === 'py') await saveFile(base + '.py', h.code + '\ncq.exporters.export(result, "' + base + '.step")\n');
+        else if (B && B.step_b64) await saveFile(base + '.step', b64bytes(B.step_b64));
         else dlNote.textContent = 'STEP comes from the CadQuery backend. Download the .py and run it with CadQuery: its last line writes ' + base + '.step.';
       } catch (e) { dlNote.textContent = 'That export didn’t work in this browser.'; }
     }));
